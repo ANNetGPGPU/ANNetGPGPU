@@ -1,0 +1,22 @@
+/*
+ * Net Types.h
+ *
+ *  Created on: 12.04.2010
+ *      Author: dgrat
+ */
+ 
+#ifndef GUI_H_
+#define GUI_H_
+
+#include "gui/QSOMReader.h"
+#include "gui/QEdge.h"
+#include "gui/QNode.h"
+#include "gui/QLayer.h"
+#include "gui/QLabel.h"
+#include "gui/QZLabel.h"
+#include "gui/QScene.h"
+#include "gui/QInputdialog.h"
+#include "gui/fancytabwidget.h"
+#include "gui/QCustomPlot/qcustomplot.h"
+
+#endif /* GUI_H_ */
