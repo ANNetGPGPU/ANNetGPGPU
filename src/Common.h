@@ -5,6 +5,8 @@
 
 
 namespace ANN {
+template <class T> class AbsLayer;
+template <class T> class AbsNeuron;
 
 template <typename T> void SetEdgesToValue(AbsLayer<T> *pSrcLayer, AbsLayer<T> *pDestLayer, const T &fVal, const bool &bAdaptState) {
 	AbsNeuron<T> *pCurNeuron;

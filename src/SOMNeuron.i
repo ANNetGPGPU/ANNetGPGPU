@@ -8,7 +8,7 @@
 %include "std_sstream.i"
 
 namespace ANN {
-	%extend SOMNeuron {
+	%extend SOMNeuron<float> {
 		char *__str__() {
 			std::ostringstream ostrs;
 			char *c_str;
@@ -21,4 +21,8 @@ namespace ANN {
 			return c_str;
 		}
 	}
+}
+
+namespace ANN {
+	%template(SOMNeuronF) SOMNeuron<float>;
 }

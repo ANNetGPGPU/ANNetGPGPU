@@ -14,6 +14,7 @@
 
 #ifndef SWIG
 #include "containers/2DArray.h"
+#include "containers/ConTable.h"
 
 #include <iostream>
 #include <vector>
@@ -22,10 +23,7 @@
 #endif
 
 namespace ANN {
-// own classes
-class TransfFunction;
-class ConTable;
-
+template<class T> class ConTable;
 template<class T> class AbsNeuron;
 template<class T> class Edge;
 
@@ -33,9 +31,7 @@ template<class T> class Edge;
 enum {
 	ANLayerInput 	= 1 << 0,	// type of layer
 	ANLayerHidden 	= 1 << 1,	// type of layer
-	ANLayerOutput 	= 1 << 2,	// type of layer
-
-	ANBiasNeuron 	= 1 << 3	// properties of layer
+	ANLayerOutput 	= 1 << 2	// type of layer
 };
 typedef uint32_t LayerTypeFlag;
 
@@ -99,7 +95,7 @@ public:
 	 */
 	virtual AbsNeuron<Type> *GetNeuron(const unsigned int &iID) const;
 	/**
-	 * @brief List of all neurons in this layer (not bias neuron).
+	 * @brief List of all neurons in this layer.
 	 * @return Returns an array with pointers of neurons in this layer.
 	 */
 	virtual const std::vector<AbsNeuron<Type> *> &GetNeurons() const;
@@ -111,21 +107,13 @@ public:
 	virtual void AddNeurons(const unsigned int &iSize) = 0;
 
 	/**
-	 * @brief Defines the type of "activation" function the net has to use for back-/propagation.
-	 * @param pFunction New "activation" function
-	 */
-	virtual void SetNetFunction 	(const TransfFunction *pFunction);
-
-	/**
 	 * @brief Sets the type of the layer (input, hidden or output layer)
 	 * @param fType Flag describing the type of the layer.
-	 * Flag: "ANBiasNeuron" will automatically add a bias neuron.
 	 */
 	virtual void SetFlag(const LayerTypeFlag &fType);
 	/**
 	 * @brief Adds a flag if not already set.
 	 * @param fType Flag describing the type of the layer.
-	 * Flag: "ANBiasNeuron" will automatically add a bias neuron.
 	 */
 	virtual void AddFlag(const LayerTypeFlag &fType);
 	/**
@@ -133,16 +121,6 @@ public:
 	 * @return Returns the flag describing the type of the layer.
 	 */
 	virtual LayerTypeFlag GetFlag() const;
-
-	/**
-	 * @brief Save layer's content to filesystem
-	 */
-	virtual void ExpToFS(BZFILE* bz2out, int iBZ2Error);
-	/**
-	 * @brief Load layer's content to filesystem
-	 * @return The ID of the current layer.
-	 */
-	virtual int ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -155,7 +133,7 @@ public:
 	 * \n NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron i
 	 * @return Returns a matrix: width=size_of_this_layer; height=size_previous_layer
 	 */
-	virtual F2DArray ExpEdgesIn() const;
+	virtual F2DArray<Type> ExpEdgesIn() const;
 
 	/** 
 	 * @brief Exports the layer to a plain array
@@ -169,13 +147,13 @@ public:
 	 * @param iStart Stop index for export
 	 * @return Returns a matrix: width=size_of_this_layer; height=iStop-iStart
 	 */
-	virtual F2DArray ExpEdgesIn(int iStart, int iStop) const;
+	virtual F2DArray<Type> ExpEdgesIn(int iStart, int iStop) const;
 	
 	/**
 	 * @brief Imports weight informations from a weight matrix and saves them to the incoming edges.
 	 * @param f2dEdges Array which stores the weight informations
 	 */
-	virtual void ImpEdgesIn(const F2DArray &f2dEdges);
+	virtual void ImpEdgesIn(const F2DArray<Type> &f2dEdges);
 	
 	/**
 	 * @brief Imports weight informations from a plain array and saves them to the incoming edges.
@@ -183,7 +161,7 @@ public:
 	 * @param iStart Start index for import
 	 * @param iStart Stop index for import
 	 */
-	virtual void ImpEdgesIn(const F2DArray &, int iStart, int iStop);
+	virtual void ImpEdgesIn(const F2DArray<Type> &, int iStart, int iStop);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -196,7 +174,7 @@ public:
 	 * \n NEURON[i < iHeight] 	: edge4, edge4, edge[n < iWidth] ==> directing to next neuron 1, 2, n
 	 * @return Returns a matrix: width=size_this_layer; height=size_of_next_layer
 	 */
-	virtual F2DArray ExpEdgesOut() const;
+	virtual F2DArray<Type> ExpEdgesOut() const;
 	
 	/** 
 	 * @brief Exports the layer to a plain array
@@ -209,13 +187,13 @@ public:
 	 * @param iStart Stop index for export
 	 * @return Returns a matrix: width=size_this_layer; height=size_of_next_layer
 	 */
-	virtual F2DArray ExpEdgesOut(int iStart, int iStop) const;
+	virtual F2DArray<Type> ExpEdgesOut(int iStart, int iStop) const;
 	
 	/**
 	 * @brief Imports weight informations from a weight matrix and saves them to the outgoing edges.
 	 * @param f2dEdges Matrix which stores the weight informations
 	 */
-	virtual void ImpEdgesOut(const F2DArray &f2dEdges);
+	virtual void ImpEdgesOut(const F2DArray<Type> &f2dEdges);
 	
 	/**
 	 * @brief Imports weight informations from a weight matrix and saves them to the outgoing edges.
@@ -223,7 +201,7 @@ public:
 	 * @param iStart Start index for import
 	 * @param iStart Stop index for import
 	 */
-	virtual void ImpEdgesOut(const F2DArray &f2dEdges, int iStart, int iStop);
+	virtual void ImpEdgesOut(const F2DArray<Type> &f2dEdges, int iStart, int iStop);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -236,7 +214,7 @@ public:
 	 * \n NEURON[i < iHeight] 	: X, Y, POS[n < iWidth] ==> directing to input
 	 * @return Returns a matrix of positions
 	 */
-	virtual F2DArray ExpPositions() const;
+	virtual F2DArray<Type> ExpPositions() const;
 	
 	/**
 	 * @brief Exports the position coordinates of the neurons of this layer to an array
@@ -249,22 +227,38 @@ public:
 	 * @param iStart Stop index for export
 	 * @return Returns a matrix of positions
 	 */
-	virtual F2DArray ExpPositions(int iStart, int iStop) const;
+	virtual F2DArray<Type> ExpPositions(int iStart, int iStop) const;
 	
 	/**
 	 * @brief Imports an layer from a plain array
 	 * @param f2dPos Matrix which stores the position coordinates of the neurons
 	 */
-	virtual void ImpPositions(const F2DArray &f2dPos);
+	virtual void ImpPositions(const F2DArray<Type> &f2dPos);
 	
 	/**
 	 * @brief Imports the position coordinates from a matrix and saves them to the neurons in this layer
 	 * @param iStart Start index for import
 	 * @param iStart Stop index for import
 	 */
-	virtual void ImpPositions(const F2DArray &f2dPos, int iStart, int iStop);
+	virtual void ImpPositions(const F2DArray<Type> &f2dPos, int iStart, int iStop);
+	
+// FILE SYSTEM
+	/**
+	 * @brief Save layer's content to filesystem
+	 */
+	virtual void ExpToFS(BZFILE* bz2out, int iBZ2Error);
+	/**
+	 * @brief Load layer's content to filesystem
+	 * @return The ID of the current layer.
+	 */
+	virtual int ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable<Type> &Table);
+	
+#ifdef __AbsLayer_ADDON
+	#include __AbsLayer_ADDON
+#endif
 };
 
+#include "AbsLayer.tpp"
 }
 
 template <class T>

@@ -10,36 +10,37 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
-
-#ifndef SOMNEURON_H_
-#define SOMNEURON_H_
+#pragma once
 
 #ifndef SWIG
 #include "AbsNeuron.h"
+#include "math/Random.h"
+#include "containers/ConTable.h"
 
+#include <cassert>
 #include <vector>
 #endif
 
 
 namespace ANN {
 
-class SOMLayer;
-
+template <class T> class SOMLayer;
 
 /**
  * @class SOMNeuron
  * @brief Implementation of a neuron in a self organizing map.
  */
-class SOMNeuron : public AbsNeuron {
+template <class Type>
+class SOMNeuron : public AbsNeuron<Type> {
 protected:
-	float 	m_fLearningRate; 	// learning rate
-	float 	m_fInfluence; 		// distance of neurons in neighborhood to alterate
-	float 	m_fConscience; 		// bias for conscience mechanism
-	float	m_fSigma0;		// inital distance bias to get activated
-	float	m_fSigmaT;		// current epoch dependent distance bias
+	Type 	m_fLearningRate; 	// learning rate
+	Type 	m_fInfluence; 		// distance of neurons in neighborhood to alterate
+	Type 	m_fConscience; 		// bias for conscience mechanism
+	Type	m_fSigma0;		// inital distance bias to get activated
+	Type	m_fSigmaT;		// current epoch dependent distance bias
 
 public:
-	SOMNeuron(SOMLayer *parent = 0);
+	SOMNeuron(SOMLayer<Type> *parent = 0);
 	virtual ~SOMNeuron();
 
 	/**
@@ -50,7 +51,7 @@ public:
 	 * @brief Load neuron's content to filesystem
 	 * @return The connections table of this neuron.
 	 */
-	virtual void ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table);
+	virtual void ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable<Type> &Table);
 	
 	/**
 	 * @brief Overload to define how the net has to act while propagating back. I. e. how to modify the edges after calculating the error deltas.
@@ -62,14 +63,14 @@ public:
 	 * Sets the initial Sigma0 value. This distance to a BMU determines whether a neuron can be influenced during a training step. 
 	 * During training this distance shrinks and Sigma0 is just the starting value.
 	 */
-	 void SetSigma0(const float &fVal);
+	 void SetSigma0(const Type &fVal);
 	 
 	/**
 	 * @brief Defines the starting activation distance. 
 	 * Sets the initial Sigma0 value. This distance to a BMU determines whether a neuron can be influenced during a training step. 
 	 * During training this distance shrinks and Sigma0 is just the starting value.
 	 */
-	 float GetSigma0();
+	 Type GetSigma0();
 	 
 	/**
 	 * @brief Calculates the value of the neuron
@@ -85,55 +86,69 @@ public:
 	 * @brief Gets the current learning rate of the network.
 	 * @return Returns the current learning rate
 	 */
-	float GetLearningRate() const;
+	Type GetLearningRate() const;
 
 	/**
 	 * @brief Sets the learning rate
 	 * @param fVal Current learning rate
 	 */
-	void SetLearningRate(const float &fVal);
+	void SetLearningRate(const Type &fVal);
 
 	/**
 	 * @brief Gets the current influence based on the neighborhood and training function.
 	 * @return Returns the current influence
 	 */
-	float GetInfluence() const;
+	Type GetInfluence() const;
 
 	/**
 	 * @brief Sets the learning rate for training process.
 	 * @param fVal Current influence
 	 */
-	void SetInfluence(const float &fVal);
+	void SetInfluence(const Type &fVal);
 
 	/**
 	 * @brief Gets the euclidian distance between two neurons.
 	 * @return Returns the current distance of the neuron to its input vector.
 	 */
-	float GetDistance2Neur(const SOMNeuron &pNeurDst);
-
-	/**
-	 * @brief Gets the euclidian distance between two neurons.
-	 * @return Returns the current distance of the neuron to its input vector.
-	 */
-	friend float GetDistance2Neur(const SOMNeuron &pNeurSrc, const SOMNeuron &pNeurDst);
+	Type GetDistance2Neur(const SOMNeuron<Type> &pNeurDst);
 	
 	/**
 	 * @brief Sets the scalar for the conscience mechanism. If it is zero, then conscience is not applied.
 	 */
-	void SetConscience(const float &fVal);
+	void SetConscience(const Type &fVal);
 	
 	/**
 	 * @brief Adds the given value to the conscience scalar
 	 */
-	void AddConscience(const float &fVal);
+	void AddConscience(const Type &fVal);
 	
 	/**
 	 * @brief Returns the conscience scalar of the network. If it is zero, then conscience is not applied.
 	 * @return Get the bias for the conscience mechanism
 	 */
-	float GetConscience();
+	Type GetConscience();
+	
+#ifdef __SOMNeuron_ADDON
+	#include __SOMNeuron_ADDON
+#endif
 };
+
+#include "SOMNeuron.tpp"
+
+/**
+ * @brief Gets the euclidian distance between two neurons.
+ * @return Returns the current distance of the neuron to its input vector.
+ */
+
+template <typename T> T GetDistance2Neur(const SOMNeuron<T> &pNeurSrc, const SOMNeuron<T> &pNeurDst) {
+	assert(pNeurSrc.GetPosition().size() == pNeurDst.GetPosition().size() );
+
+	T fDist = 0.f;
+	for(unsigned int i = 0; i < pNeurSrc.GetPosition().size(); i++) {
+		fDist += pow(pNeurDst.GetPosition().at(i) - pNeurSrc.GetPosition().at(i), 2);
+	}
+	return sqrt(fDist);
+}
 
 }
 
-#endif /* SOMNEURON_H_ */

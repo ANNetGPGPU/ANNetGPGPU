@@ -10,93 +10,49 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
-
-#ifndef RANDOMIZER_H_
-#define RANDOMIZER_H_
+#pragma once
 
 #ifndef SWIG
-#include <cstdlib>
-#include <cmath>
+#include <random>
 #include <ctime>
 #endif
-
+/*
 #ifdef __linux__
 	#include <sys/times.h>
-	/*
-	 * not defined in unix os but windows
-	 */
 	inline long getTickCount() {
 		struct tms tm;
 		return times(&tm);
 	}
-#endif /*__linux__*/
+#endif //__linux__
+
+#ifdef WIN32
+	typedef unsigned long DWORD;
+	typedef unsigned short WORD;
+	typedef unsigned int UNINT32;
+
+	#include <windows.h>
+#endif //WIN32
+*/
 
 namespace ANN {
 
-/*
- * predeclaration of some functions
- */
-inline float RandFloat(float fMin, float fMax);
-inline int RandInt(int iMin, int iMax);
-inline void InitTime();
-
-#define INIT_TIME InitTime();
-
-#ifdef WIN32
-	/*
-	 * for getTickCount()
-	 */
-	typedef unsigned long 	DWORD;
-	typedef unsigned short 	WORD;
-	typedef unsigned int 		UNINT32;
-
-	#include <windows.h>
-#endif /*WIN32*/
-
-/**
- * @brief Initialises the system clock
- */
-void InitTime() {
-	time_t t;
-	time(&t);
-	srand((unsigned int)t);
-}
-
 /**
  * @brief A random number generator for floats
- * @param fMin Minimum value of random number 
- * @param fMax Maximum value of random number
- * @return Returns a random fMin >= number <= fMax
+ * @param min Minimum value of random number 
+ * @param max Maximum value of random number
+ * @return Returns a random min >= number <= max
  */
-float RandFloat(float fMin, float fMax) {
-	float temp;
-	/* swap low & high around if the user makes no sense */
-	if (fMin > fMax) {
-		temp = fMin;
-		fMin = fMax;
-		fMax = temp;
-	}
-	/* calculate the random number & return it */
-	return rand() / (RAND_MAX + 1.f) * (fMax - fMin) + fMin;
+static std::default_random_engine __RAND_GEN(std::time(0));
+
+template <class T>
+inline T GetRandReal(T min, T max) {
+	static std::uniform_real_distribution<T> __RAND_DIST(min, max);
+	return __RAND_DIST(__RAND_GEN);
 }
 
-/**
- * @brief A random number generator for integers
- * @param fMin Minimum value of random number 
- * @param fMax Maximum value of random number
- * @return Returns a random fMin >= number <= fMax
- */
-int RandInt(int iMin, int iMax) {
-	int temp;
-	/* swap low & high around if the user makes no sense */
-	if (iMin > iMax) {
-		temp = iMin;
-		iMin = iMax;
-		iMax = temp;
-	}
-	return rand()%(iMax-iMin+1)+iMin;
+inline int GetRandInt(int min, int max) {
+	auto val = GetRandReal((double)min, (double)max);
+	return static_cast<int>(round(val));
 }
 
 }
-
-#endif /* RANDOMIZER_H_ */

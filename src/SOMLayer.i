@@ -6,13 +6,13 @@
 %include "std_sstream.i"
 
 namespace ANN {
-	%extend SOMLayer {
+	%extend SOMLayer<T> {
 		char *__str__() {
 			std::ostringstream ostrs;
 			char *c_str;
 			
 			for(unsigned int i = 0; i < $self->GetNeurons().size(); i++) {
-				float fVal = $self->GetNeuron(i)->GetValue();
+				float fVal = static_cast<float>($self->GetNeuron(i)->GetValue());
 				ostrs << fVal << std::endl;
 			}
 
@@ -21,4 +21,8 @@ namespace ANN {
 			return c_str;
 		}
 	}
+}
+
+namespace ANN {
+	%template(SOMLayerF) SOMLayer<float>;
 }

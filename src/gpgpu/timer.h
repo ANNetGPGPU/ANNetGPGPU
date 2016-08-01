@@ -9,9 +9,7 @@
 // is strictly prohibited.
 //
 /////////////////////////////////////////////////////////////////////////////
-
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
 
 #include <stdlib.h>
 
@@ -58,5 +56,5 @@ inline double GetTimer() {
     return timerElapsed.tv_sec*1000.0+timerElapsed.tv_usec/1000.0;
 #endif
 }
-#endif // TIMER_H
+
 

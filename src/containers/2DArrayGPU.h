@@ -10,9 +10,7 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
-
-#ifndef MATRIX_H_
-#define MATRIX_H_
+#pragma once
 
 #ifndef SWIG
 #include <thrust/host_vector.h>
@@ -26,21 +24,25 @@
 
 namespace ANNGPGPU {
   
+template<class T> using iterator = thrust::detail::normal_iterator<thrust::device_ptr<T>>;
+template<class T> using const_iterator = thrust::detail::normal_iterator<thrust::device_ptr<const T>>;
+
 /*
  * Host classes
  */
-class F2DArray : public thrust::device_vector<float> {
+template <class Type>
+class F2DArray : public thrust::device_vector<Type> {
 private:
 	unsigned int iWidth;
 	unsigned int iHeight;
 
 public:
 	F2DArray();
-	F2DArray(const unsigned int &width, const unsigned int &height, const float &fVal);
-	F2DArray(const unsigned int &width, const unsigned int &height, thrust::host_vector<float> vArray);
+	F2DArray(const unsigned int &width, const unsigned int &height, const Type &fVal);
+	F2DArray(const unsigned int &width, const unsigned int &height, thrust::host_vector<Type> vArray);
 
-	thrust::device_vector<float> GetSubArrayX(const unsigned int &iY) const;
-	thrust::device_vector<float> GetSubArrayY(const unsigned int &iX) const;
+	thrust::device_vector<Type> GetSubArrayX(const unsigned int &iY) const;
+	thrust::device_vector<Type> GetSubArrayY(const unsigned int &iX) const;
 
 	unsigned int GetW() const {
 		return iWidth;
@@ -53,49 +55,45 @@ public:
 		return this->size();
 	}
 
-	void SetValue(const unsigned int &iX, const unsigned int &iY, const float &fVal) {
+	void SetValue(const unsigned int &iX, const unsigned int &iY, const Type &fVal) {
 		assert(iX < iWidth);
 		assert(iY < iHeight);
 		
 		(*this)[iY*iWidth+iX] = fVal;
 	}
-	float GetValue(const unsigned int &iX, const unsigned int &iY) const {
+	Type GetValue(const unsigned int &iX, const unsigned int &iY) const {
 	  	assert(iX < iWidth);
 		assert(iY < iHeight);
 		
 		return (*this)[iY*iWidth+iX];
 	}
-
-	iterator GetRowBegin(const unsigned int &y) {
+	
+	iterator<Type> GetRowBegin(const unsigned int &y) {
 		assert(y < iHeight);
-		return begin()+y*iWidth;
+		return this->begin()+y*iWidth;
 	}
-	iterator GetRowEnd(const unsigned int &y) {
+	
+	iterator<Type> GetRowEnd(const unsigned int &y) {
 		assert(y < iHeight);
-		return begin()+y*iWidth+iWidth;
+		return this->begin()+y*iWidth+iWidth;
 	}
-
-	const_iterator GetRowBegin(const unsigned int &y) const {
+	
+	const_iterator<Type> GetRowBegin(const unsigned int &y) const {
 		assert(y < iHeight);
-		return begin()+y*iWidth;
+		return this->begin()+y*iWidth;
 	}
-	const_iterator GetRowEnd(const unsigned int &y) const {
+	
+	const_iterator<Type> GetRowEnd(const unsigned int &y) const {
 		assert(y < iHeight);
-		return begin()+y*iWidth+iWidth;
+		return this->begin()+y*iWidth+iWidth;
 	}
-/*
-	F2DArray Rotate90() {
-		F2DArray mat(iHeight, iWidth, 0);
-		for(unsigned int x = 0; x < iWidth; x++) {
-			mat.GetRowBegin(x);
-			thrust::device_vector<float> col = GetSubArrayY(x);
-			thrust::copy(col.begin(), col.end(), mat.GetRowBegin(x) );
-		}
-		return mat;
-	}
-*/
+	
+#ifdef __F2DArrayGPU_ADDON
+	#include __F2DArrayGPU_ADDON
+#endif
 };
+
+#include "2DArrayGPU.tpp"
 
 }
 
-#endif /* MATRIX_H_ */

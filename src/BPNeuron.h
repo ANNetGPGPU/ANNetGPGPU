@@ -15,10 +15,11 @@
 #ifndef SWIG
 #include <vector>
 #include "AbsNeuron.h"
+#include "math/Functions.h"
 #endif
 
 namespace ANN {
-
+template <class T> class HebbianConf;
 template <class T> class Edge;
 template <class T> class AbsLayer;
 
@@ -30,41 +31,27 @@ template <class T> class AbsLayer;
  *
  * @author Daniel "dgrat" Frenzel
  */
-template <class Type>
+template <class Type, class Functor>
 class BPNeuron : public AbsNeuron<Type> {
 private:
-	Type m_fLearningRate;	// 0,0 - 0,5
-	Type m_fWeightDecay;	// 0,005 - 0,03
-	Type m_fMomentum;	// 0,5 - 0,9
+	Functor m_TransferFunction;
+	HebbianConf<Type> m_Setup;
 
 public:
 	BPNeuron();
-	
-	/*
-	 * CTOR
-	 * & DTOR
-	 */
 	BPNeuron(AbsLayer<Type> *parentLayer);
 	/**
 	 * Copy constructor for creation of a new neuron with the "same" properties like *pNeuron
 	 * this constructor can't copy connections (edges), because they normally have dependencies to other neurons.
 	 * @param pNeuron object to copy properties from
 	 */
-	BPNeuron(BPNeuron<Type> *pNeuron);
+	BPNeuron(BPNeuron<Type, Functor> *pNeuron);
 	~BPNeuron();
 
 	/**
-	 * Sets the scalar of the learning rate.
+	 * Define the learning rate, the weight decay and the momentum term.
 	 */
-	void SetLearningRate(const Type &fVal);
-	/**
-	 * Sets the scalar of the weight decay.
-	 */
-	void SetWeightDecay(const Type &fVal);
-	/**
-	 * Sets the scalar of the momentum.
-	 */
-	void SetMomentum(const Type &fVal);
+	void Setup(const HebbianConf<Type> &config);
 
 	/**
 	 * Defines how to calculate the values of each neuron.
@@ -75,7 +62,12 @@ public:
 	 * Defines also how to change the weights.
 	 */
 	virtual void AdaptEdges();
+	
+#ifdef __BPNeuron_ADDON
+	#include __BPNeuron_ADDON
+#endif
 };
 
-}
+#include "BPNeuron.tpp"
 
+}

@@ -10,43 +10,37 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
-
-#ifndef ANSOMNETGPU_H_
-#define ANSOMNETGPU_H_
+#pragma once
 
 #ifndef SWIG
 #include "SOMExport.h"
 #include "SOMNet.h"
-#include "SOMLayer.h"
 
-#include "math/Random.h"
-#include "math/Functions.h"
-#include "containers/TrainingSet.h"
-#include "containers/2DArray.h"
-
+#include <cfloat>
+#include <cmath>
+#include <algorithm>
+#include <omp.h>
 #include <vector>
-
-#include "SOMLayer.h"
-#include "SOMNeuron.h"
-#include "AbsNeuron.h"
 #endif
 
 
 namespace ANNGPGPU {
 
-template <class F>
-class SOMNetGPU : public ANN::SOMNet<F> {
+template <class Type, class Functor>
+class SOMNetGPU : public ANN::SOMNet<Type, Functor> {
 private:
-	std::vector<SOMExport*> SplitDeviceData() const;
-	void CombineDeviceData(std::vector<SOMExport*> &SExp);
+	int m_iDeviceCount = GetCudaDeviceCount();
+	
+	std::vector<SOMExport<Type>*> SplitDeviceData() const;
+	void CombineDeviceData(std::vector<SOMExport<Type>*> &SExp);
 
 	/**
 	 * Returns the number of cuda capable devices as integer.
 	 * @return Number of cuda capable devices
 	 */
 	int GetCudaDeviceCount() const;
-	BMUExport hostSOMFindBMNeuronID(std::vector<SOMExport*> &SExp);
-	void hostSOMPropagateBW( std::vector<SOMExport*> &SExp, const unsigned int &iPatternID);
+	BMUExport<Type> hostSOMFindBMNeuronID(std::vector<SOMExport<Type>*> &SExp);
+	void hostSOMPropagateBW( std::vector<SOMExport<Type>*> &SExp, const unsigned int &iPatternID);
 
 public:
 	SOMNetGPU();
@@ -60,8 +54,13 @@ public:
 	 * Value: ANSerialMode means, that all input patterns are presented in order. Then a new cycle starts.
 	 */
 	virtual void Training(const unsigned int &iCycles = 1000, const ANN::TrainingMode &eMode = ANN::ANRandomMode);
+	
+#ifdef __SOMNetGPU_ADDON
+	#include __SOMNetGPU_ADDON
+#endif
 };
+
+//#include "SOMNetGPU.cu"
 
 };
 
-#endif /* ANSOMNETGPU_H_ */

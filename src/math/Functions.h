@@ -10,9 +10,10 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
+#pragma once
 
-#ifndef TRANSFERFUNCTIONS_H_
-#define TRANSFERFUNCTIONS_H_
+#define STRINGIFY(s) XSTRINGIFY(s)
+#define XSTRINGIFY(s) #s
 
 #ifndef SWIG
 #include <cmath>
@@ -20,10 +21,23 @@
 #include <string.h>
 #endif
 
-#define PI    3.14159265358979323846f 
+#define PI 3.14159265358979323846f 
+
+#ifdef __CUDACC__
+	#define __cudacc_attribute __host__ __device__
+#else
+	#define __cudacc_attribute
+#endif
 
 
 namespace ANN {
+
+template <class T>
+struct HebbianConf {
+	T learning_rate;
+	T momentum_rate;
+	T weight_decay;
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 /* Some basic functions of the neuronal net
@@ -35,72 +49,48 @@ namespace ANN {
  * Transfer functions for backpropagation networks
  */
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_tanh_normal (float in, float theta) {
+template <class T>
+inline T __cudacc_attribute fcn_tanh_normal (T in, T theta) {
 	return (tanh (in - theta));
 }
 
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_tanh_derivate (float in, float theta) {
+template <class T>
+inline T __cudacc_attribute fcn_tanh_derivate (T in, T theta) {
 	return (1.f - pow (tanh (in - theta), 2.f));
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_log_normal (float in, float theta) {
+template <class T>
+inline T __cudacc_attribute fcn_log_normal (T in, T theta) {
 	return (1.f / (1.f + exp (theta - in)));
 }
 
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_log_derivate (float in, float theta) {
-	float e_val;
+template <class T>
+inline T __cudacc_attribute fcn_log_derivate (T in, T theta) {
+	T e_val;
 	e_val = exp (theta - in);
 	return (e_val / pow (e_val + 1.f, 2.f));
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_linear_normal (float in, float theta) {
+template <class T>
+inline T __cudacc_attribute fcn_linear_normal (T in, T theta) {
 	return (in - theta);
 }
 
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_linear_derivate (float in, float theta) {
+template <class T>
+inline T __cudacc_attribute fcn_linear_derivate (T in, T theta) {
 	return (1.f);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_binary_normal (float in, float theta) {
+template <class T>
+inline T __cudacc_attribute fcn_binary_normal (T in, T theta) {
 	if (in >= theta) {
 		return (1.f);
 	}
 	return (-1.f);
 }
 
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_binary_derivate (float in, float theta) {
+template <class T>
+inline T __cudacc_attribute fcn_binary_derivate (T in, T theta) {
 	return (1.f);
 }
 
@@ -109,75 +99,67 @@ fcn_binary_derivate (float in, float theta) {
  * Distance functions for self organizing maps
  */
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_bubble_nhood (float dist, float sigmaT) {
+template <class T>
+inline T __cudacc_attribute fcn_bubble_nhood (T dist, T sigmaT) {
 	if(dist < sigmaT)
 		return 1.f;
 	else return 0.f;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_gaussian_nhood (float dist, float sigmaT) {
+template <class T>
+inline T __cudacc_attribute fcn_gaussian_nhood (T dist, T sigmaT) {
 	return exp(-pow(dist, 2.f)/(2.f*pow(sigmaT, 2.f)));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_cutgaussian_nhood (float dist, float sigmaT) {
+template <class T>
+inline T __cudacc_attribute fcn_cutgaussian_nhood (T dist, T sigmaT) {
 	if(dist < sigmaT)
 		return exp(-pow(dist, 2.f)/(2.f*pow(sigmaT, 2.f)));
 	else return 0.f;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_mexican_nhood (float dist, float sigmaT) {
+template <class T>
+inline T __cudacc_attribute fcn_mexican_nhood (T dist, T sigmaT) {
 	return 	2.f/(sqrt(3.f * sigmaT) * pow(PI, 0.25f) ) * 
 		(1.f-pow(dist, 2.f) / pow(sigmaT, 2.f) ) * 
 		fcn_gaussian_nhood(dist, sigmaT);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_epanechicov_nhood (float dist, float sigmaT) {
-	float fVal = 1 - pow(dist/sigmaT, 2.f);
+template <class T>
+inline T __cudacc_attribute fcn_epanechicov_nhood (T dist, T sigmaT) {
+	T fVal = 1 - pow(dist/sigmaT, 2.f);
 	if(fVal > 0)
 		return fVal;
 	else return 0.f;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_rad_decay (float sigma0, float T, float lambda) {
-	return std::floor(sigma0*exp(-T/lambda) + 0.5f);
+template <class T>
+inline T __cudacc_attribute fcn_rad_decay (T sigma0, T t, T lambda) {
+	return std::floor(sigma0*exp(-t/lambda) + 0.5f);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CUDACC__
-	__host__ __device__
-#endif
-inline float
-fcn_lrate_decay (float sigma0, float T, float lambda) {
-	return sigma0*exp(-T/lambda);
+template <class T>
+inline T __cudacc_attribute fcn_lrate_decay (T sigma0, T t, T lambda) {
+	return sigma0*exp(-t/lambda);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <class T>
+inline T __cudacc_attribute hebbian_learn (T neuron_value, T edge_value, T edge_momentum, T targ_neuron_error_delta, const HebbianConf<T> &heb) {
+	return heb.learning_rate * neuron_value * targ_neuron_error_delta
+	- heb.weight_decay * edge_value
+	+ heb.momentum_rate * edge_momentum;
+}
+
+template <class T>
+inline T __cudacc_attribute som_learn(T fWeight, T fInfluence, T fInput) {
+	return fWeight + (fInfluence*(fInput-fWeight) );
 }
 
 /** 
@@ -185,32 +167,41 @@ fcn_lrate_decay (float sigma0, float T, float lambda) {
  * @brief Represents an activation function.
  * Complete definition of the function and it's derivate.
  */
-class TransfFunction {
-public:
+template<class T> using pLearn = T (*)(T, T, T, T, const HebbianConf<T> &);
+template<class T> using p2Parm = T (*)(T, T);
+template<class T> using p3Parm = T (*)(T, T, T);
+
+template <class Type, pLearn<Type> LearnCB, p2Parm<Type> NormCB, p2Parm<Type> DerivCB>
+struct TransfFunction {
 	/** 
-	 * @brief The symbolic name of the function. 
+	 * @brief learning function (e.g. Hebbian). 
 	 */
-	char *name;
+	static Type learn(Type a, Type b, Type c, Type d, const HebbianConf<Type> &setup) { 
+		return LearnCB(a, b, c, d, setup); 
+	}
 
 	/** 
 	 * @brief Transfer function for backpropagation networks.
 	 * The first parameter gives the x-value,
 	 * the second one is the theta value, taken from the neuron.
 	 */
-	float (* normal)(float, float);
+	static Type transfer(Type a, Type b) { 
+		return NormCB(a, b); 
+	}
 
 	/** 
 	 * @brief The derivative of the transfre function for backpropagation networks.
 	 * Used for the backpropagation algorithm.
 	 */
-	float (* derivate)(float, float);
+	static Type derivate(Type a, Type b) { 
+		return DerivCB(a, b); 
+	}
 };
 
-/** 
- * Function prototypes for DistFunction<T,T,T>
- */
-typedef float (*pDistanceFu) 	(float, float);
-typedef float (*pDecayFu) 	(float, float, float);
+template<class T> using fcn_log = TransfFunction<T, hebbian_learn<T>, fcn_log_normal<T>, fcn_log_derivate<T> >;
+template<class T> using fcn_tan = TransfFunction<T, hebbian_learn<T>, fcn_tanh_normal<T>, fcn_tanh_derivate<T> >;
+template<class T> using fcn_lin = TransfFunction<T, hebbian_learn<T>, fcn_linear_normal<T>, fcn_linear_derivate<T> >;
+template<class T> using fcn_bin = TransfFunction<T, hebbian_learn<T>, fcn_binary_normal<T>, fcn_binary_derivate<T> >;
 
 /** 
  * @class DistFunction
@@ -218,17 +209,21 @@ typedef float (*pDecayFu) 	(float, float, float);
  * Consists of a distance and a decay function. 
  * Normally just the neighborhood function is free to be changed. 
  */
-template <pDistanceFu Dist, pDecayFu Rad, pDecayFu LRate>
+template <class Type, p3Parm<Type> LearnCB, p2Parm<Type> DistCB, p3Parm<Type> RadCB, p3Parm<Type> LRateCB>
 class DistFunction {
 public:
+	/** 
+	 * @brief learning function (e.g. Hebbian). 
+	 */
+	static __cudacc_attribute Type learn(Type a, Type b, Type c) { 
+		return LearnCB(a, b, c); 
+	}
+	
 	/** 
 	 * @brief The distance (or neighborhood) function for SOMs
 	 * Used for the determination of the excitation of a neuron.
 	 */
-	#ifdef __CUDACC__
-		__host__ __device__
-	#endif
-	static float distance(float a, float b) { return Dist(a,b); };
+	static __cudacc_attribute Type distance(Type a, Type b) { return DistCB(a,b); };
 	
 	/**  
 	 * @brief The decay function for SOMs
@@ -241,10 +236,7 @@ public:
 	 * \\ \mbox{t is the current time-step (iteration of the loop). }
 	 * \f$
 	 */
-	#ifdef __CUDACC__
-		__host__ __device__
-	#endif
-	static float rad_decay(float a, float b, float c) { return Rad(a,b,c); };
+	static __cudacc_attribute Type rad_decay(Type a, Type b, Type c) { return RadCB(a,b,c); };
 	
 	/**  
 	 * @brief The decay function for SOMs
@@ -257,50 +249,16 @@ public:
 	 * \\ \mbox{t is the current time-step (iteration of the loop). }
 	 * \f$
 	 */
-	#ifdef __CUDACC__
-		__host__ __device__
-	#endif
-	static float lrate_decay(float a, float b, float c) { return LRate(a,b,c); };
+	static __cudacc_attribute Type lrate_decay(Type a, Type b, Type c) { return LRateCB(a,b,c); };
 };
 
-typedef ANN::DistFunction<fcn_gaussian_nhood, 	fcn_rad_decay, fcn_lrate_decay> functor_gaussian;
-typedef DistFunction<fcn_bubble_nhood,		fcn_rad_decay, fcn_lrate_decay> functor_bubble;
-typedef DistFunction<fcn_cutgaussian_nhood, 	fcn_rad_decay, fcn_lrate_decay> functor_cutgaussian;
-typedef DistFunction<fcn_epanechicov_nhood, 	fcn_rad_decay, fcn_lrate_decay> functor_epanechicov;
-typedef DistFunction<fcn_mexican_nhood, 	fcn_rad_decay, fcn_lrate_decay> functor_mexican;
-
-/** 
- * @class Functions
- * @brief List of activation functions that are available to the Network.
- */
-class Functions {
-public:
-	 /**
-	  * @brief The sigmoid tanh function.
-	  * \f$f_{act} (x, \Theta) = tanh (x - \Theta)\f$
-	  */
-	static TransfFunction fcn_tanh;
-
-	 /**
-	  * @brief The sigmoid log function.
-	  * \f$f_{act} (x, \Theta) = \frac{1}{1 + e^{-(x - \Theta)}}\f$
-	  */
-	static TransfFunction fcn_log;
-	
-	 /**
-	  * @brief A linear activation function.
-	  * \f$f_{act} (x, \Theta) = x - \Theta\f$
-	  */
-	static TransfFunction fcn_linear;
-
-	 /**
-	  * @brief A binary activation function.
-	  * \f$f_{act} (x, \Theta) = \left\{\begin{array}{cl}1.0  x \geq
-	  * \Theta\\-1.0  x < \Theta\end{array}\right.\f$
-	  */
-	static TransfFunction fcn_binary;
+template<class T> using functor_gaussian = DistFunction<T, som_learn<T>, fcn_gaussian_nhood<T>, fcn_rad_decay<T>, fcn_lrate_decay<T> >;
+template<class T> using functor_bubble = DistFunction<T, som_learn<T>, fcn_bubble_nhood<T>, fcn_rad_decay<T>, fcn_lrate_decay<T> >;
+template<class T> using functor_cutgaussian = DistFunction<T, som_learn<T>, fcn_cutgaussian_nhood<T>, fcn_rad_decay<T>, fcn_lrate_decay<T> >;
+template<class T> using functor_epanechicov = DistFunction<T, som_learn<T>, fcn_epanechicov_nhood<T>, fcn_rad_decay<T>, fcn_lrate_decay<T> >;
+template<class T> using functor_mexican = DistFunction<T, som_learn<T>, fcn_mexican_nhood<T>, fcn_rad_decay<T>, fcn_lrate_decay<T> >;
 };
 
-};
-
-#endif /* TRANSFERFUNCTIONS_H_ */
+#ifdef __Functions_ADDONS
+	#include __Functions_ADDONS
+#endif

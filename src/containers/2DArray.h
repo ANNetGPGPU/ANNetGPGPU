@@ -10,47 +10,51 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
-
-#ifndef NEURONARRAY_H_
-#define NEURONARRAY_H_
+#pragma once
 
 #ifndef SWIG
-#include <iostream>
+#include <cassert>
 #include <vector>
-#ifdef __CUDACC__
+#include <iostream>
+#include <cstring>
+#ifdef __CUDA_ARCH__ 
 #include "2DArrayGPU.h"
 #endif
 #endif
 
 namespace ANN {
 
-class F3DArray;
+template<class T> class F3DArray;
 
 /**
  * \brief Pseudo 2D-array.
  * @author Daniel "dgrat" Frenzel
  */
+template <class Type>
 class F2DArray {
-	friend class F3DArray;
+	friend class F3DArray<Type>;
 
 private:
 	bool m_bAllocated;
 	unsigned int m_iX;	// nr. of neurons in layer m_iY
 	unsigned int m_iY;	// nr. of layer in net
-	float *m_pArray;	// value of neuron
+	Type *m_pArray;	// value of neuron
 
 protected:
 	void GetOutput();
   
-	void SetArray(const unsigned int &iX, const unsigned int &iY, const float &fVal);
-	void SetArray(const unsigned int &iX, const unsigned int &iY, float *pArray);
-	float *GetArray() const;
+	void SetArray(const unsigned int &iX, const unsigned int &iY, const Type &fVal);
+	void SetArray(const unsigned int &iX, const unsigned int &iY, Type *pArray);
+	Type *GetArray() const;
 
 public:
 	// Standard C++ "conventions"
 	F2DArray();
-	F2DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, const float &fVal);
-	F2DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, float *pArray);
+	F2DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, const Type &fVal);
+	F2DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, Type *pArray);
+#ifdef __CUDACC__ 
+	F2DArray(const ANNGPGPU::F2DArray<Type> &mat);
+#endif
 	virtual ~F2DArray();
 
 	void Alloc(const unsigned int &iSize);
@@ -61,28 +65,32 @@ public:
 	
 	unsigned int GetTotalSize() const;
 
-	void SetSubArrayX(const unsigned int &iY, const std::vector<float> &vRow);
-	void SetSubArrayY(const unsigned int &iX, const std::vector<float> &vCol);
+	void SetSubArrayX(const unsigned int &iY, const std::vector<Type> &vRow);
+	void SetSubArrayY(const unsigned int &iX, const std::vector<Type> &vCol);
 	
-	std::vector<float> GetSubArrayX(const unsigned int &iY) const;
-	std::vector<float> GetSubArrayY(const unsigned int &iX) const;
+	std::vector<Type> GetSubArrayX(const unsigned int &iY) const;
+	std::vector<Type> GetSubArrayY(const unsigned int &iX) const;
 
-	void SetValue(const unsigned int &iX, const unsigned int &iY, const float &fVal);
-	float GetValue(const unsigned int &iX, const unsigned int &iY) const;
+	void SetValue(const unsigned int &iX, const unsigned int &iY, const Type &fVal);
+	Type GetValue(const unsigned int &iX, const unsigned int &iY) const;
 
 	/* Operators */
-	operator float*();
-	operator const float*() const;
+	operator Type*();
+	operator const Type*() const;
 	
-	float *operator[] (int iY);
-	const float *operator[] (int iY) const;
+	Type *operator[] (int iY);
+	const Type *operator[] (int iY) const;
 	
-	#ifdef __CUDACC__
-	F2DArray(const ANNGPGPU::F2DArray &);
-	operator ANNGPGPU::F2DArray ();
-	#endif
+#ifdef __CUDACC__
+	ANNGPGPU::F2DArray<Type> ToDevice() const;
+#endif
+	
+#ifdef __F2DArray_ADDON
+	#include __F2DArray_ADDON
+#endif
 };
+
+#include "2DArray.tpp"
 
 }
 
-#endif /* NEURONARRAY_H_ */

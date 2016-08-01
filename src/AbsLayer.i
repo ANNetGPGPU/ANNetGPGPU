@@ -1,7 +1,11 @@
 %{
-#include "base/AbsLayer.h"
+#include "AbsLayer.h"
 %}
 
 %ignore ANN::SetEdgesToValue;
 
-%include "base/AbsLayer.h" 
+%include "AbsLayer.h" 
+
+namespace ANN {
+	%template(AbsLayerF) AbsLayer<float>;
+}

@@ -10,24 +10,29 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
-
-#ifndef SOMLAYER_H_
-#define SOMLAYER_H_
+#pragma once
 
 #ifndef SWIG
-#include "containers/2DArray.h"
-#include "AbsLayer.h"
+#include <cassert>
+#include <omp.h>
 #include <vector>
+
+#include "AbsLayer.h"
+#include "Common.h"
+#include "containers/2DArray.h"
 #endif
 
 
 namespace ANN {
 
+template <class T> class SOMNeuron;
+
 /**
  * @class SOMLayer
  * @brief Container class for neurons in a self organizing map.
  */
-class SOMLayer : public AbsLayer {
+template <class Type>
+class SOMLayer : public AbsLayer<Type> {
 private:
 	std::vector<unsigned int> m_vDim;
 	/*
@@ -44,7 +49,7 @@ public:
 	/**
 	 * @brief Copy CTOR. Creates a layer. 
 	 */
-	SOMLayer(const SOMLayer *pLayer);
+	SOMLayer(const SOMLayer<Type> *pLayer);
 	/**
 	 * @brief Creates a layer with a certain number of neurons. 
 	 * @param iSize Number of neurons in this layer. 
@@ -95,7 +100,7 @@ public:
 	 * @param pDestLayer pointer to layer to connect with.
 	 * @param bAllowAdapt allows the change of the weights between both layers.
 	 */
-	void ConnectLayer(AbsLayer *pDestLayer, const bool &bAllowAdapt = true);
+	void ConnectLayer(AbsLayer<Type> *pDestLayer, const bool &bAllowAdapt = true);
 
 	/** 
 	 * @brief Connects this layer with another one.
@@ -103,7 +108,7 @@ public:
 	 * @param f2dEdgeMat Matrix containing the values of the edges of the network.
 	 * @param bAllowAdapt Sets whether edges are changeable.
 	 */
-	void ConnectLayer(AbsLayer *pDestLayer, const F2DArray &f2dEdgeMat, const bool &bAllowAdapt = true);
+	void ConnectLayer(AbsLayer<Type> *pDestLayer, const F2DArray<Type> &f2dEdgeMat, const bool &bAllowAdapt = true);
 	/**
 	 * @brief Sets learning rate scalar of the network.
 	 * @param fVal New value of the learning rate. Recommended: 0.005f - 1.0f
@@ -127,8 +132,13 @@ public:
 	 * @return std::vector<float> Returns the position.
 	 */
 	std::vector<float> GetPosition(const unsigned int iNeuronID);
+	
+#ifdef __SOMLayer_ADDON
+	#include __SOMLayer_ADDON
+#endif
 };
+
+#include "SOMLayer.tpp"
 
 }
 
-#endif /* SOMLAYER_H_ */

@@ -1,162 +1,115 @@
-#ifndef ANFUNCTORS_H_
-#define ANFUNCTORS_H_
+#pragma once
 
 #ifndef SWIG
 #include "math/Functions.h"
 #endif
 
 
+template <class Type>
 struct sAXpY_functor { // Y <- A * X + Y
-    float a;
+	Type a;
+	sAXpY_functor(Type _a) : a(_a) {}
 
-    sAXpY_functor(float _a) : a(_a) {}
-
-    __host__ __device__
-	float operator()(float x, float y) {
+	__cudacc_attribute
+	Type operator()(Type x, Type y) const {
 		return a * x + y;
 	}
 };
 
+template <class Type>
 struct sAX_functor { // Y <- A * X
-    float a;
-
-    sAX_functor(float _a) : a(_a) {}
-
-    __host__ __device__
-	float operator()(float x) {
+	Type a;
+	sAX_functor(Type _a) : a(_a) {}
+	
+	__cudacc_attribute
+	Type operator()(Type x) const {
 		return a * x;
 	}
 };
 
+template <class Type>
 struct sAXmY_functor { // Y <- A * (X - Y)
-	float a;
+	Type a;
+	sAXmY_functor(Type _a) : a(_a) {}
 
-	sAXmY_functor(float _a) : a(_a) {}
-
-	__host__ __device__
-	float operator()(float x, float y) { 
+	__cudacc_attribute
+	Type operator()(Type x, Type y) const { 
 		return a * (x - y);
 	}
 };
 
+template <class Type>
 struct sXmAmY_functor { // Y <- X - (A - Y)
-	float a;
+	Type a;
+	sXmAmY_functor(Type _a) : a(_a) {}
 
-	sXmAmY_functor(float _a) : a(_a) {}
-
-	__host__ __device__
-	float operator()(float x, float y) { 
+	__cudacc_attribute
+	Type operator()(Type x, Type y) const { 
 		return x - (a - y);
 	}
 };
 
+template <class Type>
 struct spowAmXpY_functor { // Y <- (A-X)^2 + Y
-	float a;
+	Type a;
+	spowAmXpY_functor(Type _a) : a(_a) {}
 
-	spowAmXpY_functor(float _a) : a(_a) {}
-
-	__host__ __device__
-	float operator()(float x, float y) { 
-		return pow(a-x, 2) + y;
-	}
-};
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-struct sm13bubble_functor {
-	float fSigmaT;
-	sm13bubble_functor(float sigmaT) : fSigmaT(sigmaT)	{}
-
-	__host__ __device__
-	float operator()(float dist) {
-		return ANN::fcn_bubble_nhood(sqrt(dist), fSigmaT);
+	__cudacc_attribute
+	Type operator()(Type x, Type y) const { 
+		return std::pow(a-x, 2) + y;
 	}
 };
 
-struct sm13gaussian_functor {
-	float fSigmaT;
-	sm13gaussian_functor(float sigmaT) : fSigmaT(sigmaT)	{}
-
-	__host__ __device__
-	float operator()(float dist) {
-		return ANN::fcn_gaussian_nhood(sqrt(dist), fSigmaT);
+template <class Type>
+struct square_root {
+	__cudacc_attribute
+	Type operator()(Type x) const {
+		return std::sqrt(x);
 	}
 };
 
-struct sm13cut_gaussian_functor {
-	float fSigmaT;
-	sm13cut_gaussian_functor(float sigmaT) : fSigmaT(sigmaT)	{}
 
-	__host__ __device__
-	float operator()(float dist) {
-		return ANN::fcn_cutgaussian_nhood(sqrt(dist), fSigmaT);
-	}
-};
-
-struct sm13mexican_functor {
-	float fSigmaT;
-	sm13mexican_functor(float sigmaT) : fSigmaT(sigmaT)	{}
-
-	__host__ __device__
-	float operator()(float dist) {
-		return ANN::fcn_mexican_nhood(sqrt(dist), fSigmaT);
-	}
-};
-
-struct sm13epanechicov_functor {
-	float fSigmaT;
-	sm13epanechicov_functor(float sigmaT) : fSigmaT(sigmaT)	{}
-
-	__host__ __device__
-	float operator()(float dist) {
-		return ANN::fcn_epanechicov_nhood(sqrt(dist), fSigmaT);
-	}
-};
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
+template <class Type, class F>
 struct hebbian_functor {
-	float fInput;
-	hebbian_functor(float input) : fInput(input) {}
+	Type fInput;
+	hebbian_functor(Type input) : fInput(input) {}
 
-	__host__ __device__
-	float operator()(float fWeight, float fInfluence) {
-		return fWeight + (fInfluence*(fInput-fWeight) );
+	__cudacc_attribute
+	Type operator()(Type fWeight, Type fInfluence) const {
+		return F::learn(fWeight, fInfluence, fInput);
 	}
 };
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-template <class F>
-struct sm20distance_functor {
-	__host__ __device__
-	float operator()(float sigmaT, float dist) {
-		return F::distance(sqrt(dist), sigmaT);
+
+template <class Type, class F>
+struct distance_functor {
+	__cudacc_attribute
+	Type operator()(Type sigmaT, Type dist) const {
+		return F::distance(dist, sigmaT);
 	}
 };
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-template <class F>
-struct sm20rad_decay_functor {
-	float fCycle;
-	float fCycles;
-	sm20rad_decay_functor(float cycle, float cycles) : fCycle(cycle), fCycles(cycles) {}
 
-	__host__ __device__
-	float operator()(float sigma0) {
-		float fLambda = fCycles / log(sigma0);
-		return pow(F::rad_decay(sigma0, fCycle, fLambda), 2);
+template <class Type, class F>
+struct rad_decay_functor {
+	Type fCycle;
+	Type fCycles;
+	rad_decay_functor(Type cycle, Type cycles) : fCycle(cycle), fCycles(cycles) {}
+
+	__cudacc_attribute
+	Type operator()(Type sigma0) const {
+		Type fLambda = fCycles / log(sigma0);
+		return F::rad_decay(sigma0, fCycle, fLambda);
 	}
 };
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-template <class F>
-struct sm20lrate_decay_functor {
-	float fCycle;
-	float fCycles;
-	sm20lrate_decay_functor(float cycle, float cycles) : fCycle(cycle), fCycles(cycles) {}
 
-	__host__ __device__
-	float operator()(float lrate) {
+template <class Type, class F>
+struct lrate_decay_functor {
+	Type fCycle;
+	Type fCycles;
+	lrate_decay_functor(Type cycle, Type cycles) : fCycle(cycle), fCycles(cycles) {}
+
+	__cudacc_attribute
+	Type operator()(Type lrate) const {
 		return F::lrate_decay(lrate, fCycle, fCycles);
 	}
 };
 
-#endif

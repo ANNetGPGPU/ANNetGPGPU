@@ -10,9 +10,7 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
-
-#ifndef SOMNET_H_
-#define SOMNET_H_
+#pragma once
 
 #ifndef SWIG
 #include <vector>
@@ -42,8 +40,8 @@
 
 namespace ANN {
 
-class SOMNeuron;
-class Centroid;
+template <class T> class SOMNeuron;
+template <class T> class Centroid;
 
 enum {
 	ANRandomMode 	= 1 << 0,	// type of layer
@@ -55,18 +53,17 @@ typedef uint32_t TrainingMode;
  * @class SOMNet
  * @brief Implementation of a self organizing map.
  */
-template<class F>
-class SOMNet : public AbsNet {
+template<class Type, class Functor>
+class SOMNet : public AbsNet<Type> {
 protected:
-	F 		m_DistFunction;
-	
-	SOMNeuron 	*m_pBMNeuron;
+	Functor		m_DistFunction;
+	SOMNeuron<Type> *m_pBMNeuron;
 
 	unsigned int 	m_iCycle;	// current cycle step in learning progress
 	unsigned int 	m_iCycles;	// maximum of cycles
 	
 	// Conscience mechanism
-	float 		m_fConscienceRate;
+	Type 		m_fConscienceRate;
 
 	/* first Ctor */
 	std::vector<unsigned int> m_vDimI; // dimensions of the input layer (Cartesian coordinates)
@@ -119,7 +116,7 @@ public:
 	/**
 	 * @brief Creates a self organizing map object.
 	 */
-	SOMNet(AbsNet *pNet);
+	SOMNet(AbsNet<Type> *pNet);
 
 	/**
 	 * @brief Creates a double layered network. Each layer with vDim[1] * vDim[2] * vDim[n+1] * .. neurons.
@@ -145,19 +142,19 @@ public:
 	 * Sets the initial Sigma0 value. This distance to a BMU determines whether a neuron can be influenced during a training step. 
 	 * During training this distance shrinks and Sigma0 is just the starting value.
 	 */
-	 void SetSigma0(const float &fVal);
+	 void SetSigma0(const Type &fVal);
 	
 	/**
 	 * @brief Adds a new layer to the network. New layer will get appended to m_lLayers.
 	 * @param pLayer Pointer to the new layer.
 	 */
-	virtual void AddLayer(AbsLayer *pLayer);
+	virtual void AddLayer(AbsLayer<Type> *pLayer);
 
 	/**
 	 * @brief Creates the network based on a connection table.
 	 * @param ConTable is the connection table
 	 */
-	void CreateNet(const ConTable &Net);
+	void CreateNet(const ConTable<Type> &Net);
 
 	/**
 	 * @brief Creates a double layered network. Each layer with vDim[1] * vDim[2] * vDim[n+1] * .. neurons.
@@ -180,8 +177,8 @@ public:
 	 */
 	void CreateSOM(	const std::vector<unsigned int> &vDimI,
 			const std::vector<unsigned int> &vDimO,
-			const F2DArray &f2dEdgeMat,
-			const F2DArray &f2dNeurPos);
+			const F2DArray<Type> &f2dEdgeMat,
+			const F2DArray<Type> &f2dNeurPos);
 
 	/**
 	 * @brief Creates a double layered network.
@@ -204,50 +201,28 @@ public:
 
 	/**
 	 * @brief Clustering results of the network.
-	 * @return std::vector<Centroid> Returns to each input value the obtained centroid with the euclidean distance and the corresponding ID of the BMU.
+	 * @return std::vector<Centroid> Iterates through the input list and calcs the euclidean distance based on the BMU.
 	 */
-	std::vector<Centroid> GetCentrOInpList();
-
-	/**
-	 * @brief Clustering results of the network.
-	 * @return std::vector<Centroid> Returns the centroids found after training and the ID of the corresponding BMUs.
-	 */
-	std::vector<Centroid> GetCentroidList();
+	std::vector<Centroid<Type>> GetCentroidList();
 
 	/**
 	 * @brief The Cartesian position of a neuron in the network
-	 * @return std::vector<float> Returns the position.
+	 * @return std::vector<Type> Returns the position.
 	 */
-	std::vector<float> GetPosition(const unsigned int iNeuronID);
+	std::vector<Type> GetPosition(const unsigned int iNeuronID);
 	
 	/**
 	 * @brief Sets learning rate scalar of the network.
 	 * @param fVal New value of the learning rate. Recommended: 0.005f - 1.0f
 	 */
-	void SetLearningRate 	(const float &fVal);
-
-	/**
-	 * @brief Sets the neighborhood and decay function of the network together.
-	 * @param pFCN Kind of function the net has to use while back-/propagating.
-	 */
-	void SetDistFunction (const F &functor) {
-		m_DistFunction = functor;
-	}
-
-	/**
-	 * @brief Returns the currently used distance (neighborhood) function of the network.
-	 * @return Return the kind of function the net has to use while back-/propagating.
-	 */
-	F GetDistFunction() const {
-		return m_DistFunction;
-	}
+	void SetLearningRate 	(const Type &fVal);
 
 	/**
 	 * @brief Sets the scalar for the conscience mechanism. If it is zero, then conscience is not applied.
 	 * A value of zero leads to the standard kohonen implementation.
 	 * Value must be: 0.f < fVal < 1.f
 	 */
-	void SetConscienceRate(const float &fVal);
+	void SetConscienceRate(const Type &fVal);
 
 	/**
 	 * @brief Returns the conscience scalar of the network. If it is zero, then conscience is not applied.
@@ -255,11 +230,13 @@ public:
 	 * A value of zero leads to the standard kohonen implementation. 
 	 * Value must be: 0.f < fVal < 1.f
 	 */
-	float GetConscienceRate();
+	Type GetConscienceRate();
+	
+#ifdef __SOMNet_ADDON
+	#include __SOMNet_ADDON
+#endif
 };
 
 #include "SOMNet.tpp"
 
 }
-
-#endif /* SOMNET_H_ */

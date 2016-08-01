@@ -15,23 +15,41 @@
 #ifndef SWIG
 #include "AbsNet.h"
 
+#include "BPNeuron.h"
+#include "BPLayer.h"
+
+#include "Common.h"
+#include "containers/ConTable.h"
+#include "containers/TrainingSet.h"
+#include "containers/ConTable.h"
+
+#include "Edge.h"
+
+#include "math/Functions.h"
+#include "math/Random.h"
+
 #include <vector>
 #include <string>
+
+#include <iostream>
+#include <cassert>
+#include <algorithm>
+#include <omp.h>
 #endif
 
 namespace ANN {
 
 class Function;
-class ConTable;
-template <class T> class BPNeuron;
-template <class T> class BPLayer;
+template <class T> class ConTable;
+template <class T, class F> class BPNeuron;
+template <class T, class F> class BPLayer;
 
 /**
  * \brief Implementation of a back propagation network.
  *
  * @author Daniel "dgrat" Frenzel
  */
-template <class Type>
+template <class Type, class Functor>
 class BPNet : public AbsNet<Type>
 {
 protected:
@@ -41,6 +59,8 @@ protected:
 	 * @param flType Flag describing the type of the net.
 	 */
 	virtual void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
+	
+	HebbianConf<Type> m_Setup;
 
 public:
 	/**
@@ -51,20 +71,20 @@ public:
 	 * Copy constructor for copying the complete network:
 	 * @param pNet
 	 */
-	BPNet(BPNet<Type> *pNet);
+	BPNet(BPNet<Type, Functor> *pNet);
 
 	virtual ~BPNet();
 
 	/*
 	 *
 	 */
-	virtual void CreateNet(const ConTable &Net);
+	virtual void CreateNet(const ConTable<Type> &Net);
 
 	/**
 	 * Adds a new layer to the network. New layer will get appended to m_lLayers.
 	 * @param pLayer Pointer to the new layer.
 	 */
-	virtual void AddLayer(BPLayer<Type> *pLayer);
+	virtual void AddLayer(BPLayer<Type, Functor> *pLayer);
 
 	/**
 	 * Cycles the input from m_pTrainingData
@@ -140,37 +160,18 @@ public:
 	 * @param iStopID
 	 * @return Returns a pointer to the new sub-network.
 	 */
-	BPNet<Type> *GetSubNet(const unsigned int &iStartID, const unsigned int &iStopID);
+	BPNet<Type, Functor> *GetSubNet(const unsigned int &iStartID, const unsigned int &iStopID);
 
 	/**
-	 * Sets learning rate scalar of the network.
-	 * @param fVal New value of the learning rate. Recommended: 0.005f - 1.0f
+	 * Define the learning rate, the weight decay and the momentum term.
 	 */
-	void SetLearningRate(const Type &fVal);
-	/**
-	 * @return Return the learning rate of the net.
-	 */
-	Type GetLearningRate() const;
+	void Setup(const HebbianConf<Type> &config);
 	
-	/**
-	 * Sets momentum scalar of the network.
-	 * @param fVal New value of the momentum. Recommended: 0.3f - 0.9f
-	 */
-	void SetMomentum(const Type &fVal);
-	/**
-	 * @return Returns the momentum scalar of the net.
-	 */
-	Type GetMomentum() const;
-	
-	/**
-	 * Sets weight decay of the network.
-	 * @param fVal New value of the weight decay. Recommended: 0.f
-	 */
-	void SetWeightDecay(const Type &fVal);
-	/**
-	 * @return Return the weight decay scalar of the net.
-	 */
-	Type GetWeightDecay() const;
+#ifdef __BPNet_ADDON
+	#include __BPNet_ADDON
+#endif
 };
+
+#include "BPNet.tpp"
 
 }

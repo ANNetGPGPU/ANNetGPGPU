@@ -3,3 +3,7 @@
 %}
 
 %include "containers/TrainingSet.h"  
+
+namespace ANN {
+	%template(TrainingSetF) TrainingSet<float>;
+}

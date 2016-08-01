@@ -4,9 +4,13 @@
 
 %include "containers/Centroid.h"
 
-
 %include <std_sstream.i>
-%extend ANN::Centroid {
+
+namespace ANN {
+	%template(CentroidF) Centroid<float>;
+}
+
+%extend ANN::Centroid<float> {
 	char *__str__() {
 		std::ostringstream ostrs;
 		char *c_str;
@@ -16,7 +20,7 @@
 		ostrs << "VCen.: ";
 		ostrs << "[";
 		for(unsigned int i = 0; i < $self->m_vCentroid.size(); i++) {
-			float fVal = $self->m_vCentroid[i];
+			float fVal = static_cast<float>($self->m_vCentroid[i]);
 			ostrs << fVal;
 			if(i < $self->m_vCentroid.size()-1) {
 				ostrs << ", ";
@@ -37,5 +41,9 @@
 		c_str = new char[ostrs.str().length()+1];
 		strcpy(c_str, ostrs.str().c_str());
 		return c_str;
+	}
+
+	float __getitem__(int i) {
+		return self->m_vCentroid.at(i);
 	}
 }

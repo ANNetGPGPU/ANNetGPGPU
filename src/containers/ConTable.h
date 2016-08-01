@@ -10,9 +10,7 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
-
-#ifndef NETCONNECTIONTABLE_H_
-#define NETCONNECTIONTABLE_H_
+#pragma once
 
 #ifndef SWIG
 #include <string>
@@ -29,6 +27,7 @@ typedef uint32_t NetTypeFlag;
  *
  * @author Daniel "dgrat" Frenzel
  */
+template <class T>
 struct ConDescr {
 	int m_iSrcLayerID;
 	int m_iDstLayerID;
@@ -36,11 +35,15 @@ struct ConDescr {
 	int m_iSrcNeurID;
 	int m_iDstNeurID;
 
-	float m_fVal;
+	T m_fVal;
+	std::vector<T> m_vMisc; // information for addons
 	
-	std::vector<float> m_vMisc; // information for addons
+#ifdef __ConDescr_ADDON
+	#include __ConDescr_ADDON
+#endif
 };
 
+template <class T>
 struct NeurDescr {
 	int m_iLayerID;
 	int m_iNeurID;
@@ -48,7 +51,11 @@ struct NeurDescr {
 	std::string m_sTransFunction;
 	std::string m_sDistFunction;
 
-	std::vector<float> m_vMisc; // information for addons
+	std::vector<T> m_vMisc; // information for addons
+	
+#ifdef __NeurDescr_ADDON
+	#include __NeurDescr_ADDON
+#endif
 };
 
 /**
@@ -56,21 +63,21 @@ struct NeurDescr {
  *
  * @author Daniel "dgrat" Frenzel
  */
+template <class T>
 struct ConTable {
-	NetTypeFlag 			NetType;
-	unsigned int 			NrOfLayers;
+	NetTypeFlag NetType;
+	unsigned int NrOfLayers;
 
-	std::vector<unsigned int> 	SizeOfLayer;
-	std::vector<int> 		ZValOfLayer;
-	std::vector<LayerTypeFlag> 	TypeOfLayer;
-
-	std::vector<NeurDescr> 		Neurons;
-
-	std::vector<ConDescr> 		BiasCons;		// TODO not elegant
-	std::vector<ConDescr> 		NeurCons;
+	std::vector<unsigned int> SizeOfLayer;
+	std::vector<int> ZValOfLayer;
+	std::vector<LayerTypeFlag> TypeOfLayer;
+	std::vector<NeurDescr<T> > Neurons;
+	std::vector<ConDescr<T> > NeurCons;
+	std::vector<T> m_vMisc; // information for addons
 	
-	std::vector<float> m_vMisc; // information for addons
+#ifdef __ConTable_ADDON
+	#include __ConTable_ADDON
+#endif
 };
 
 }
-#endif /* NETCONNECTIONTABLE_H_ */

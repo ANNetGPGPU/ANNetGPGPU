@@ -1,7 +1,31 @@
+# Updates - 07/31/2016
+
+- The project was more or less rewritten into a template library
+- The CUDA device function pointers are poorly implemented by CUDA, thus the function extensions work with template parameters now
+- As most of the code gets created just at compile time, the compile time increased in comparison to the old version
+- Most classes are now header only
+- A bug with SOMs on GPU was fixed, which led to wrong results of the radius decay function
+
+Here is the new device pointer replacement. The distance function is now a template argument. Guess, this will make things easier in future.
+
+```
+int main(int argc, char *argv[]) {
+	// ..
+	ANNGPGPU::SOMNetGPU<float, ANN::functor_gaussian<float>> gpu;
+```
+
 # Updates - 04/12/2016
 
-The support for CUDA > version 4 was broken. Now it works again (tested with CUDA 7.5)
+- The support for CUDA > version 4 was broken. Now it works again (tested with CUDA 7.5)
 
+# Projects
+## Artwork from Ben Bogart
+
+![artw_i](http://www.ekran.org/ben/wp/wp-content/uploads/2016/05/SOMResults_noSegmentation_SOMScale5_h1352_ns200_i1000000-scaler8.jpg)
+__This image is from [ekran.org](http://www.ekran.org/ben/wp/2016/results-without-segmentation/#more-3490) and shows a panorama after several training cycles of a SOM__
+
+![artw_i](http://www.ekran.org/ben/wp/wp-content/uploads/2016/03/still-proxy-pano-edit-montage-5_500-1_0.5-SOM-100000.jpg)
+__Arranged composition of SOMs from [ekran.org](http://www.ekran.org/ben/wp/2016/03/)__
 
 # Introduction
 

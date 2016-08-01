@@ -14,6 +14,8 @@
 
 #ifndef SWIG
 #include "AbsLayer.h"
+#include "Common.h"
+#include "containers/ConTable.h"
 
 #include <iostream>
 #include <vector>
@@ -24,8 +26,8 @@ namespace ANN {
 
 // own classes
 class Function;
-class ConTable;
-template <class T> class BPNeuron;
+template <class T> class ConTable;
+template <class T> class HebbianConf;
 
 /**
  * \brief Represents a container for neurons in a back propagation network.
@@ -34,14 +36,10 @@ template <class T> class BPNeuron;
  *
  * @author Daniel "dgrat" Frenzel
  */
-template <class Type>
+template <class Type, class Functor>
 class BPLayer : public AbsLayer<Type> {
-	/*
-	 * Pointer to bias neuron.
-	 */
-	BPNeuron<Type> *m_pBiasNeuron;
 	int m_iZLayer;
-
+	
 public:
 	BPLayer();
 	
@@ -54,7 +52,7 @@ public:
 	 * this constructor can't copy connections (edges), because they normally have dependencies to other layers.
 	 * @param pLayer object to copy properties from
 	 */
-	BPLayer(const BPLayer<Type> *pLayer, int iZLayer);
+	BPLayer(const BPLayer<Type, Functor> *pLayer, int iZLayer);
 	/**
 	 * Creates a new layer
 	 * @param iNumber Number of neurons of this layer.
@@ -96,21 +94,13 @@ public:
 	/**
 	 * Sets the type of the layer (input, hidden or output layer)
 	 * @param fType Flag describing the type of the layer.
-	 * Flag: "ANBiasNeuron" will automatically add a bias neuron.
 	 */
 	virtual void SetFlag(const LayerTypeFlag &fType);
 	/**
 	 * Adds a flag if not already set.
 	 * @param fType Flag describing the type of the layer.
-	 * Flag: "ANBiasNeuron" will automatically add a bias neuron.
 	 */
 	virtual void AddFlag(const LayerTypeFlag &fType);
-
-	/**
-	 * Pointer to the Bias neuron.
-	 * @return Return the pointer of the bias neuron in this layer
-	 */
-	BPNeuron<Type> *GetBiasNeuron() const;
 
 	/**
 	 * Connects this layer with another one "pDestLayer".
@@ -120,7 +110,7 @@ public:
 	 * The second ID is equal to the ID of neurons in the other (pDestLayer).
 	 * @param bAllowAdapt allows the change of the weights between both layers.
 	 */
-	void ConnectLayer(AbsLayer<Type> *pDestLayer, std::vector<std::vector<int> > Connections, const bool bAllowAdapt = true); // TODO use connections table
+	void ConnectLayer(AbsLayer<Type> *pDestLayer, std::vector<std::vector<int> > Connections, const bool bAllowAdapt = true);
 	/**
 	 * Connects this layer with another one.
 	 * Each neuron of this layer with each of the neurons in "pDestLayer".
@@ -131,48 +121,35 @@ public:
 	void ConnectLayer(AbsLayer<Type> *pDestLayer, const bool &bAllowAdapt = true);
 
 	/**
-	 * Sets learning rate scalar of the network.
-	 * @param fVal New value of the learning rate. Recommended: 0.005f - 1.0f
+	 * Define the learning rate, the weight decay and the momentum term.
 	 */
-	void SetLearningRate 	(const Type &fVal);
-	/**
-	 * Sets momentum scalar of the network.
-	 * @param fVal New value of the momentum. Recommended: 0.3f - 0.9f
-	 */
-	void SetMomentum 	(const Type &fVal);
-	/**
-	 * Sets weight decay of the network.
-	 * @param fVal New value of the weight decay. Recommended: 0.f
-	 */
-	void SetWeightDecay 	(const Type &fVal);
+	void Setup(const HebbianConf<Type> &config);
 
 	/**
-	 * Save layer's content to filesystem
+	 * TODO
+	 */
+	virtual void ImpMomentumsEdgesIn(const F2DArray<Type> &);
+	/**
+	 * TODO
+	 */
+	virtual void ImpMomentumsEdgesOut(const F2DArray<Type> &);
+
+// FILE SYSTEM :
+	/**
+	 * @brief Save layer's content to filesystem
 	 */
 	virtual void ExpToFS(BZFILE* bz2out, int iBZ2Error);
 	/**
-	 * Load layer's content to filesystem
+	 * @brief Load layer's content to filesystem
 	 * @return The ID of the current layer.
 	 */
-	virtual int ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table);
-
-	/**
-	 * TODO
-	 */
-	virtual void ImpMomentumsEdgesIn(const F2DArray &);
-	/**
-	 * TODO
-	 */
-	virtual void ImpMomentumsEdgesOut(const F2DArray &);
-
-	/** \brief:
-	 * Bias neuron 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * ..
-	 * @return Returns a vector like matrix with one row for each outgoing weight to the next layer
-	 */
-	virtual F2DArray ExpBiasEdgesOut() const;
-
-	virtual void ImpBiasEdgesOut(const F2DArray &) const;
+	virtual int ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable<Type> &Table);
+	
+#ifdef __BPLayer_ADDON
+	#include __BPLayer_ADDON
+#endif
 };
+
+#include "BPLayer.tpp"
 
 }

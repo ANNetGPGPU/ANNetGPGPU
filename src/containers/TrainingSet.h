@@ -51,7 +51,13 @@ public:
 
 	void ExpToFS(BZFILE* bz2out, int iBZ2Error);
 	void ImpFromFS(BZFILE* bz2in, int iBZ2Error);
+	
+#ifdef __TrainingSet_ADDON
+	#include __TrainingSet_ADDON
+#endif
 };
+
+#include "TrainingSet.tpp"
 
 }
 

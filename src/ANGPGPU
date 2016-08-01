@@ -8,7 +8,6 @@
 #ifndef GPGPU_H_
 #define GPGPU_H_
 
-
 #include "SOMNetGPU.h"
 
 #endif /* GPGPU_H_ */

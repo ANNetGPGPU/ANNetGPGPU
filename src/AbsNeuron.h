@@ -13,6 +13,10 @@
 #pragma once
 
 #ifndef SWIG
+#include "containers/TrainingSet.h"
+#include "containers/ConTable.h"
+#include "math/Random.h"
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -21,8 +25,7 @@
 
 namespace ANN {
 
-class ConTable;
-class TransfFunction;
+template<class T> class ConTable;
 template<class T> class Edge;
 template<class T> class AbsLayer;
 template<class T> class AbsNeuron;
@@ -44,12 +47,8 @@ protected:
 	AbsLayer<Type> *m_pParentLayer;			// layer which is inheriting this neuron
 	int m_iNeuronID;				// ID of this neuron in the layer
 
-	Edge<Type> *m_pBias;					// Pointer to the bias edge (or connection to bias neuron)
-
 	std::vector<Edge<Type>*> m_lOutgoingConnections;
 	std::vector<Edge<Type>*> m_lIncomingConnections;
-
-	TransfFunction *m_ActFunction;
 
 public:
 	AbsNeuron();
@@ -150,26 +149,6 @@ public:
 	 * @return Returns the error delta of this neuron.
 	 */
 	virtual const Type &GetErrorDelta() const;
-	/**
-	 * @brief Defines a bias weight for this neuron.
-	 * @param pANEdge Pointer to edge connecting this neuron with bias neuron.
-	 */
-	virtual void SetBiasEdge(Edge<Type> *pANEdge);
-	/**
-	 * @brief Returns the current bias weight for this neuron.
-	 * @return Returns pointer to edge connecting this neuron with bias neuron.
-	 */
-	virtual Edge<Type> *GetBiasEdge() const;
-	/**
-	 * @brief Sets the transfer function for this neuron.
-	 * @param pFCN Kind of function the net has to use while back-/propagating.
-	 */
-	virtual void SetTransfFunction (const TransfFunction *pFCN);
-	/**
-	 * @brief Returns the used transfer function of this neuron.
-	 * @return The transfer function of the net.
-	 */
-	virtual const TransfFunction *GetTransfFunction() const;
 
 	/**
 	 * @brief Overload to define how the net has to act while propagating back.
@@ -190,14 +169,19 @@ public:
 	 * @brief Load neuron's content to filesystem
 	 * @return The connections table of this neuron.
 	 */
-	virtual void ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table);
+	virtual void ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable<Type> &Table);
 
 	/*
 	 * Returns the value of the neuron.
 	 */
 	operator Type() const;
+	
+#ifdef __AbsNeuron_ADDON
+	#include __AbsNeuron_ADDON
+#endif
 };
 
+#include "AbsNeuron.tpp"
 }
 
 template <class T>

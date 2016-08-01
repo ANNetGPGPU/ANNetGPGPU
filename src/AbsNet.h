@@ -14,28 +14,31 @@
 
 #ifndef SWIG
 #include "AbsLayer.h"
+#include "Common.h"
+#include "containers/TrainingSet.h"
+#include "containers/ConTable.h"
+#include "math/Random.h"
 
-#include <cassert>
-#include <vector>
-#include <string>
 #include <bzlib.h>
-#include <sstream>
+#include <cassert>
+#include <cmath>
 #include <iostream>
+#include <omp.h>
+#include <sstream>
+#include <string>
+#include <vector>
 #endif
 
 namespace ANN {
- 
-// containers
-template<class T> class TrainingSet;
-class ConTable;
-class TransfFunction;
+template <class T> class ConTable;
+template <class T> class TrainingSet;
 template <class T> class AbsLayer;
+template <class T> class AbsNeuron;
 
 enum {
 	ANNetSOM 	= 1 << 0,	// type of layer
 	ANNetBP 	= 1 << 1,	// type of layer
 	ANNetHopfield 	= 1 << 2,	// type of layer
-
 	ANNetUndefined 	= 1 << 3
 };
 typedef uint32_t NetTypeFlag;
@@ -52,15 +55,9 @@ protected:
 	NetTypeFlag m_fTypeFlag;
 
 	TrainingSet<Type> *m_pTrainingData;			// list of training data
-	Type m_fLearningRate;				// global learning rate
-	Type m_fMomentum;
-	Type m_fWeightDecay;
-	TransfFunction *m_pTransfFunction;
-
-	/* list of all layers in this net; last should be output layer, first input layer */
 
 	// TODO maybe USE MAP for index administration?!
-	std::vector<AbsLayer<Type>*> m_lLayers;		// list of all layers, layer->GetID() must be identical with indices of this array!
+	std::vector<AbsLayer<Type>*> m_lLayers;			// list of all layers, layer->GetID() must be identical with indices of this array!
 	AbsLayer<Type> *m_pIPLayer;				// pointer to input layer
 	AbsLayer<Type> *m_pOPLayer;				// pointer to output layer
 
@@ -79,7 +76,7 @@ public:
 	 * @brief Creates a network in memory from container structure
 	 * @param Net container structure to create a network in memory.
 	 */
-	virtual void CreateNet(const ConTable &Net);
+	virtual void CreateNet(const ConTable<Type> &Net);
 
 	/**
 	 * @brief Implement to determine propagation behavior
@@ -224,24 +221,6 @@ public:
 	virtual void SetOPLayer(const unsigned int iID);
 
 	/**
-	 * @brief Defines the type of "activation" function the net has to use for back-/propagation.
-	 * @param pFunction New "activation" function
-	 */
-	virtual void SetTransfFunction(const TransfFunction *pFunction);
-
-	/**
-	 * @brief Defines the type of "activation" function the net has to use for back-/propagation.
-	 * @param pFunction New "activation" function
-	 */
-	virtual void SetTransfFunction(const TransfFunction &pFunction);
-
-	/**
-	 * @brief Access of the currently used transfer function of the network.
-	 * @return Returns the current net (activation) function.
-	 */
-	virtual TransfFunction *GetTransfFunction();
-
-	/**
 	 * @brief Save net's content to filesystem
 	 */
 	virtual void ExpToFS(std::string path);
@@ -256,8 +235,13 @@ public:
 	 * @return Returns the values of the output layer after propagating the net.
 	 */
 	virtual std::vector<Type> GetOutput();
+	
+#ifdef __AbsNet_ADDON
+	#include __AbsNet_ADDON
+#endif
 };
 
+#include "AbsNet.tpp"
 }
 
 template <class T>

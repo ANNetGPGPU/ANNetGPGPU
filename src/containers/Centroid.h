@@ -10,11 +10,10 @@
 #     Daniel <dgrat> Frenzel - initial API and implementation
 #-------------------------------------------------------------------------------
 */
-
-#ifndef CENTROID_H_
-#define CENTROID_H_
+#pragma once
 
 #ifndef SWIG
+#include <iostream>
 #include <vector>
 #endif
 
@@ -23,12 +22,13 @@ namespace ANN {
  * Representation of the centroid as N-dimensional structure of the size of the input vector(s) and
  * with the euclidean distance(s) to the input vector(s)
  */
+template <class Type>
 struct Centroid {
-	std::vector<float> 	m_vInput;
-	std::vector<float> 	m_vCentroid;
+	std::vector<Type> m_vInput;
+	std::vector<Type> m_vCentroid;
 	
-	unsigned int 		m_iBMUID;
-	float 			m_fEucDist;
+	unsigned int m_iBMUID;
+	Type m_fEucDist;
 
 	bool operator<(const Centroid &rhs) const {
 		return m_iBMUID < rhs.m_iBMUID;
@@ -48,16 +48,19 @@ struct Centroid {
 	bool operator!=(const Centroid &rhs) const {
 		return m_iBMUID != rhs.m_iBMUID;
 	}
-
-	friend std::ostream& operator << (std::ostream &os, Centroid &op) {
-		for(unsigned int i = 0; i < op.m_vCentroid.size(); i++) {
-			std::cout<<"Centroid["<<i<<"]: "<<op.m_vCentroid[i]<<std::endl;
-		}
-		std::cout<<"Euclidean distance: "<<op.m_fEucDist<<std::endl;
-		return os;
-	}
+	
+#ifdef __Centroid_ADDON
+	#include __Centroid_ADDON
+#endif
 }; 
 
 }
 
-#endif /* CENTROID_H_ */ 
+template <class T>
+std::ostream& operator << (std::ostream &os, ANN::Centroid<T> &op) {
+	for(unsigned int i = 0; i < op.m_vCentroid.size(); i++) {
+		std::cout<<"Centroid["<<i<<"]: "<<op.m_vCentroid[i]<<std::endl;
+	}
+	std::cout<<"Euclidean distance: "<<op.m_fEucDist<<std::endl;
+	return os;     // Ref. auf Stream
+}

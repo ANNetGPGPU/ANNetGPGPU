@@ -12,9 +12,12 @@
 */
 #pragma once
 
+#ifndef SWIG
 #include <iostream>
 #include <cassert>
 
+#include "math/Random.h"
+#endif
 
 namespace ANN {
 
@@ -114,7 +117,13 @@ public:
 	 * Returns the value of the edge.
 	 */
 	operator Type() const;
+	
+#ifdef __Edge_ADDON
+	#include __Edge_ADDON
+#endif
 };
 
-}
+#include "Edge.tpp"
+
+};
 
