@@ -5,12 +5,9 @@ PROJECT (Back_Propagation)
 
 FIND_PACKAGE(BZip2 REQUIRED)
 
-LIST(APPEND ${CMAKE_CXX_FLAGS} -std=gnu++11)
+LIST (APPEND ${CMAKE_CXX_FLAGS} -std=gnu++11)
 
-# Make sure the compiler can find include files from our ANNet library.
-INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR})
-INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include)
-INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/math)
+INCLUDE_DIRECTORIES (${Examples_SOURCE_DIR}/QSOMReader.cpp)
 
 ADD_EXECUTABLE (back_propagation back_propagation.cpp)
 TARGET_LINK_LIBRARIES (back_propagation ANNet) 

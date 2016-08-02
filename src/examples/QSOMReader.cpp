@@ -1,4 +1,4 @@
-#include "QSOMReader.h"
+#include <QSOMReader.h>
 
 
 SOMReader::SOMReader(const unsigned int &iWidth, const unsigned int iHeight,

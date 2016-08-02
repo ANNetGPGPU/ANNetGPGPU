@@ -9,7 +9,7 @@
 #include <ANContainers>
 #include <ANMath>
 
-#include "Samples.h"
+#include <Samples.h>
 
 #include <ctime>
 #include <iostream>
