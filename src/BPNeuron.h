@@ -46,7 +46,6 @@ public:
 	 * @param pNeuron object to copy properties from
 	 */
 	BPNeuron(BPNeuron<Type, Functor> *pNeuron);
-	~BPNeuron();
 
 	/**
 	 * Define the learning rate, the weight decay and the momentum term.

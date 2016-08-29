@@ -17,18 +17,14 @@
 
 int main(int argc, char *argv[]) {
 	ANN::BPNet<float, ANN::fcn_log<float>> cpu_one;
-    
-	ANN::BPLayer<float, ANN::fcn_log<float>> layer1(56, ANN::ANLayerInput);
-	ANN::BPLayer<float, ANN::fcn_log<float>> layer2(64, ANN::ANLayerHidden);
-	ANN::BPLayer<float, ANN::fcn_log<float>> layer3(9, ANN::ANLayerOutput);
-
-	layer1.ConnectLayer(&layer2);
-	layer2.ConnectLayer(&layer3);
         
-	cpu_one.AddLayer(&layer1);
-	cpu_one.AddLayer(&layer2);
-	cpu_one.AddLayer(&layer3);
+	ANN::BPLayer<float, ANN::fcn_log<float>> *layer1 = cpu_one.AddLayer(56, ANN::ANLayerInput);
+	ANN::BPLayer<float, ANN::fcn_log<float>> *layer2 = cpu_one.AddLayer(64, ANN::ANLayerHidden);
+	ANN::BPLayer<float, ANN::fcn_log<float>> *layer3 = cpu_one.AddLayer(9, ANN::ANLayerOutput);
 
+	layer1->ConnectLayer(layer2);
+	layer2->ConnectLayer(layer3);
+	
 	ANN::TrainingSet<float> input;
 	input.AddInput(fInp1, 56);
 	input.AddOutput(fOut1, 9);

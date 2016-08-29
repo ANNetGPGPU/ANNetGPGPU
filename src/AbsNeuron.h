@@ -64,11 +64,11 @@ public:
 	 */
 	AbsNeuron(const AbsNeuron<Type> *pNeuron);
 	virtual ~AbsNeuron();
-
+	
 	/**
-	 * @brief Deletes all weights of this neuron
+	 * @brief Calls FreeMemory() and clears the lists
 	 */
-	void EraseAllEdges();
+	virtual void EraseAll();
 
 	/**
 	 * @brief Pointer to the layer inherting this neuron.

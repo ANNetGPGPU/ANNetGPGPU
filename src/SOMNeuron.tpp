@@ -11,11 +11,6 @@ SOMNeuron<Type>::SOMNeuron(SOMLayer<Type> *parent) : AbsNeuron<Type>(parent) {
 }
 
 template <class Type>
-SOMNeuron<Type>::~SOMNeuron() {
-	// TODO Auto-generated destructor stub
-}
-
-template <class Type>
 void SOMNeuron<Type>::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
 	std::cout<<"Save SOMNeuron to FS()"<<std::endl;
 	AbsNeuron<Type>::ExpToFS(bz2out, iBZ2Error);

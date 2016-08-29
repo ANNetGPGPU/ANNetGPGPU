@@ -48,11 +48,6 @@ SOMLayer<Type>::SOMLayer(const std::vector<unsigned int> &vDim, LayerTypeFlag fT
 }
 
 template <class Type>
-SOMLayer<Type>::~SOMLayer() {
-	// TODO Auto-generated destructor stub
-}
-
-template <class Type>
 void SOMLayer<Type>::AddNeurons(const unsigned int &iSize) {
 	std::vector<Type> vPos(1);
 	for(unsigned int x = 0; x < iSize; x++) {

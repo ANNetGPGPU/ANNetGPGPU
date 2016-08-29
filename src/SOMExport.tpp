@@ -29,59 +29,26 @@ SOMExport<Type>::SOMExport(const ANNGPGPU::F2DArray<Type> &mEdgeMat,
 		     const thrust::host_vector<Type> &vSigma0,
 		     const thrust::host_vector<Type> &vLearningRate) 
 {
-	f2dEdges 	= mEdgeMat;
-	f2dPositions 	= mPosMat;
-	
-	dvInput 	= NULL;
-	dvConscience 	= NULL;
-	dvSigma0 	= NULL;
-	dvLearningRate  = NULL;
-	
-	dvConscience 	= new thrust::device_vector<Type>;
-	*dvConscience 	= vConscience;
-	
-	dvSigma0    	= new thrust::device_vector<Type>;
-	*dvSigma0 	= vSigma0;
-	
-	dvLearningRate  = new thrust::device_vector<Type>;
-	*dvLearningRate = vLearningRate;
+	_f2dEdges 	= mEdgeMat;
+	_f2dPositions 	= mPosMat;
+	_dvConscience 	= vConscience;
+	_dvSigma0 	= vSigma0;
+	_dvLearningRate = vLearningRate;
 }
 
 template <class Type>
-void SOMExport<Type>::SetInput(thrust::device_vector<Type> *p_dvInput) {
-	assert(p_dvInput != NULL);
-
-	if(dvInput != NULL) {
-		delete dvInput;
-		dvInput = NULL;
-	}
-	if(dvInput == NULL && p_dvInput != NULL) {
-		dvInput = p_dvInput;
-	}
+void SOMExport<Type>::Clear() {
+	_dvConscience.clear();
+	_dvSigma0.clear();
+	_dvLearningRate.clear();
 }
 
 template <class Type>
-void SOMExport<Type>::SetConscience(thrust::device_vector<Type> *p_dvConscience) {
-	assert(p_dvConscience != NULL);
-
-	if(dvConscience != NULL) {
-		delete dvConscience;
-		dvConscience = NULL;
-	}
-	if(dvConscience == NULL && p_dvConscience != NULL) {
-		dvConscience = p_dvConscience;
-	}
+void SOMExport<Type>::SetConscience(thrust::device_vector<Type> &dvConscience) {
+	_dvConscience = dvConscience;
 }
 
 template <class Type>
-void SOMExport<Type>::SetSigma0(thrust::device_vector<Type> *p_dvSigma0) {
-	assert(p_dvSigma0 != NULL);
-
-	if(dvSigma0 != NULL) {
-		delete dvSigma0;
-		dvSigma0 = NULL;
-	}
-	if(dvSigma0 == NULL && p_dvSigma0 != NULL) {
-		dvSigma0 = p_dvSigma0;
-	}
+void SOMExport<Type>::SetSigma0(thrust::device_vector<Type> &dvSigma0) {
+	_dvSigma0 = dvSigma0;
 }

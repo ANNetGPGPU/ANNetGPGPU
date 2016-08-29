@@ -41,7 +41,6 @@ protected:
 
 public:
 	SOMNeuron(SOMLayer<Type> *parent = 0);
-	virtual ~SOMNeuron();
 
 	/**
 	 * @brief Save neuron's content to filesystem

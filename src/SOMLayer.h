@@ -69,7 +69,6 @@ public:
 	 * @param fType Type of the layer. 
 	 */
 	SOMLayer(const std::vector<unsigned int> &vDim, LayerTypeFlag fType);
-	virtual ~SOMLayer();
 
 	/**
 	 * @brief Resizes the layer.

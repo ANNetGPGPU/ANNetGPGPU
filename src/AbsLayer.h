@@ -64,6 +64,11 @@ public:
 	virtual ~AbsLayer();
 
 	/**
+	 * @brief Calls FreeMemory() and clears the lists
+	 */
+	virtual void EraseAll();
+	
+	/**
 	 * @brief Sets the current ID in the Network inheriting the layer. Useful for administration purposes.
 	 */
 	virtual void SetID(const int &iID);
@@ -71,15 +76,6 @@ public:
 	 * @brief Returns the current ID in the Network inheriting the layer. Useful for administration purposes.
 	 */
 	virtual int GetID() const;
-
-	/**
-	 * @brief Deletes the all edges connecting two layers
-	 */
-	virtual void EraseAllEdges();
-	/**
-	 * @brief Deletes the complete layer (all connections and all values).
-	 */
-	virtual void EraseAll();
 
 	/**
 	 * @brief Resizes the layer. Deletes old neurons and adds new ones (initialized with random values).

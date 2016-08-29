@@ -35,7 +35,6 @@ class F2DArray {
 	friend class F3DArray<Type>;
 
 private:
-	bool m_bAllocated;
 	unsigned int m_iX;	// nr. of neurons in layer m_iY
 	unsigned int m_iY;	// nr. of layer in net
 	Type *m_pArray;	// value of neuron

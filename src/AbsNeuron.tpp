@@ -35,12 +35,16 @@ AbsNeuron<Type>::AbsNeuron(const AbsNeuron<Type> *pNeuron) {
 
 template <class Type>
 AbsNeuron<Type>::~AbsNeuron() {
-	m_lIncomingConnections.clear();
-	m_lOutgoingConnections.clear();
+	EraseAll();
 }
 
 template <class Type>
-void AbsNeuron<Type>::EraseAllEdges() {
+void AbsNeuron<Type>::EraseAll() {
+	// here we delete all edges which branch out, starting at this neuron
+	for(int i = 0; i < m_lOutgoingConnections.size(); i++) {
+		delete m_lOutgoingConnections[i];
+	}
+	
 	m_lIncomingConnections.clear();
 	m_lOutgoingConnections.clear();
 }

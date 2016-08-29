@@ -52,16 +52,16 @@ template <class T, class F> class BPLayer;
 template <class Type, class Functor>
 class BPNet : public AbsNet<Type>
 {
-protected:
-	/**
-	 * Adds a layer to the network.
-	 * @param iSize Number of neurons of the layer.
-	 * @param flType Flag describing the type of the net.
-	 */
-	virtual void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
-	
+protected:	
 	HebbianConf<Type> m_Setup;
 
+	/**
+	 * Adds a new layer to the network. New layer will get appended to m_lLayers.
+	 * @param pLayer Pointer to the new layer.
+	 */
+	virtual void AddLayer(BPLayer<Type, Functor> *pLayer);
+
+	
 public:
 	/**
 	 * Standard constructor
@@ -73,19 +73,18 @@ public:
 	 */
 	BPNet(BPNet<Type, Functor> *pNet);
 
-	virtual ~BPNet();
-
 	/*
 	 *
 	 */
 	virtual void CreateNet(const ConTable<Type> &Net);
 
 	/**
-	 * Adds a new layer to the network. New layer will get appended to m_lLayers.
-	 * @param pLayer Pointer to the new layer.
+	 * Adds a layer to the network.
+	 * @param iSize Number of neurons of the layer.
+	 * @param flType Flag describing the type of the net.
 	 */
-	virtual void AddLayer(BPLayer<Type, Functor> *pLayer);
-
+	virtual BPLayer<Type, Functor> *AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
+	
 	/**
 	 * Cycles the input from m_pTrainingData
 	 * Checks total error of the output returned from SetExpectedOutputData()
@@ -109,10 +108,10 @@ public:
 	 * \f$
 	 * \n
 	 * \f$
-	 * 	\\	\varphi\ \text{ is a differentiable activation function,}
-	 * 	\\	n \text{ is the number of inputs,}
-	 * 	\\	x_{i} \text{ is the input } i \text{ and}
-	 * 	\\	w_{ij} \text{ is the weight between neuron } i \text{ and neuron } j
+	 * \\	\varphi\ \text{ is a differentiable activation function,}
+	 * \\	n \text{ is the number of inputs,}
+	 * \\	x_{i} \text{ is the input } i \text{ and}
+	 * \\	w_{ij} \text{ is the weight between neuron } i \text{ and neuron } j
 	 * \f$.
 	 */
 	virtual void PropagateFW();
@@ -122,30 +121,30 @@ public:
 	 * Also updates all weights of the net beginning from the output layer. \n
 	 * The backpropagation works as described below: \n \n
 	 * \f$
-	 * 	\\	\mbox{1. Is the neuron in the output layer, it takes part of the output,}
-	 * 	\\	\mbox{2. is the neuron in the hidden layer, the weight adaption could get calculated.}
-	 * 	\\	\mbox{	concrete:}
+	 * \\	\mbox{1. Is the neuron in the output layer, it takes part of the output,}
+	 * \\	\mbox{2. is the neuron in the hidden layer, the weight adaption could get calculated.}
+	 * \\	\mbox{	concrete:}
 	 *
-	 * 	\\	\Delta w_{ij}(t+1)= \eta \delta_{j} x_{i} + \alpha \Delta w_{ij}(t)
+	 * \\	\Delta w_{ij}(t+1)= \eta \delta_{j} x_{i} + \alpha \Delta w_{ij}(t)
 	 *
-	 * 	\\	\mbox{	with}
+	 * \\	\mbox{	with}
 	 *
-	 * 	\\	\delta_{j}=\begin{cases}
-	 * 		\varphi'(\mbox{net}_{j})(t_{j}-o_{j}) & \mbox{if } j \mbox{ is an output neuron,}\\
-	 * 		\varphi'(\mbox{net}_{j}) \sum_{k} \delta_{k} w_{jk} & \mbox{if } j \mbox{ is an hidden neuron.}
-	 * 		\end{cases}
+	 * \\	\delta_{j}=\begin{cases}
+	 * 	\varphi'(\mbox{net}_{j})(t_{j}-o_{j}) & \mbox{if } j \mbox{ is an output neuron,}\\
+	 * 	\varphi'(\mbox{net}_{j}) \sum_{k} \delta_{k} w_{jk} & \mbox{if } j \mbox{ is an hidden neuron.}
+	 * 	\end{cases}
 	 *
-	 *	\\ 	\mbox{	and}
+	 * \\ 	\mbox{	and}
 	 *
-	 * 	\\	\Delta w_{ij} \mbox{ is the change of the weight } w_{ij} \mbox{ of the connection }i\mbox{ to neuron }j\mbox{,}
-	 * 	\\	\eta \mbox{ is the learning rate, which regulates to amount of the weight change,}
-	 * 	\\	\delta_{j} \mbox{ is the error signal of the neuron } j mbox{,}
-	 * 	\\	x_{i} \mbox{ is the output of the neuron } i \mbox{,}
-	 * 	\\	t_{j} \mbox{ is the debit output of the output neuron } j \mbox{,}
-	 * 	\\	o_{j} \mbox{ is the actual output of the output neuron } j \mbox{ und}
-	 * 	\\	k \mbox{ is the index of the subsequent neurons of } j \mbox{.}
-	 * 	\\ 	\Delta w_{ij}(t+1) \mbox{ is the change of the weight } w_{ij}(t+1) \mbox{ of the connection of neuron } i \mbox{ to neuron } j \mbox{ at the time point (t+1),}
-	 * 	\\ 	\alpha \mbox{ is the influence of the momentum term } \Delta w_{ij}(t) \mbox{. Correlates with the weight change of the prior time point.}
+	 * \\	\Delta w_{ij} \mbox{ is the change of the weight } w_{ij} \mbox{ of the connection }i\mbox{ to neuron }j\mbox{,}
+	 * \\	\eta \mbox{ is the learning rate, which regulates to amount of the weight change,}
+	 * \\	\delta_{j} \mbox{ is the error signal of the neuron } j mbox{,}
+	 * \\	x_{i} \mbox{ is the output of the neuron } i \mbox{,}
+	 * \\	t_{j} \mbox{ is the debit output of the output neuron } j \mbox{,}
+	 * \\	o_{j} \mbox{ is the actual output of the output neuron } j \mbox{ und}
+	 * \\	k \mbox{ is the index of the subsequent neurons of } j \mbox{.}
+	 * \\ 	\Delta w_{ij}(t+1) \mbox{ is the change of the weight } w_{ij}(t+1) \mbox{ of the connection of neuron } i \mbox{ to neuron } j \mbox{ at the time point (t+1),}
+	 * \\ 	\alpha \mbox{ is the influence of the momentum term } \Delta w_{ij}(t) \mbox{. Correlates with the weight change of the prior time point.}
 	 * \f$
 	 */
 	virtual void PropagateBW();

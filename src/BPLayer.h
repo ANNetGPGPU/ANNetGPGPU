@@ -60,7 +60,6 @@ public:
 	 * @param fType Flag describing the type of the layer.
 	 */
 	BPLayer(const unsigned int &iNumber, LayerTypeFlag fType, int iZLayer = -1);
-	virtual ~BPLayer();
 
 	/**
 	 * Sets the z-layer of the layer. The z-layer defines, when a layer gets processed by the network.

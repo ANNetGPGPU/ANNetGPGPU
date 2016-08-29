@@ -11,7 +11,7 @@
 #include "gpgpu/helper_cuda.h"
 
 #include "SOMNetGPU.h"
-#include "Functors.h"
+#include "math/Functors.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,12 +140,12 @@ void SOMNetGPU<Type, Functor>::CombineDeviceData(std::vector<SOMExport<Type>*> &
 
 		// Copy back conscience
 		for(unsigned int j = 0; j <= iStop-iStart; j++) {
-			this->m_pOPLayer->GetNeuron(j+iStart)->SetValue((*SExp.at(i)->dvConscience)[j]);
+			this->m_pOPLayer->GetNeuron(j+iStart)->SetValue((SExp.at(i)->_dvConscience)[j]);
 		}
 		
 		printf(".. Copy edges from device to host: %d/%d\n", i+1, iDeviceCount);
 		// Copy weights between neurons of the input and output layer
-		pLayer->ImpEdgesIn(SExp.at(i)->f2dEdges, iStart, iStop);
+		pLayer->ImpEdgesIn(SExp.at(i)->_f2dEdges, iStart, iStop);
 		
 		// delete old network export container
 		delete SExp.at(i);
@@ -168,7 +168,7 @@ SOMNetGPU<Type, Functor>::SOMNetGPU() {
 	this->m_iHeightO = 0.f;
 
 	// Conscience mechanism
-	this->m_fTypeFlag 	= ANN::ANNetSOM;
+	this->m_fTypeFlag = ANN::ANNetSOM;
 }
 
 template<class Type, class Functor>
@@ -231,8 +231,15 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
 
 	// Write edge matrix back
 	std::cout<<"Copy memory from device to host .."<<std::endl;
-	// Copy data from device to host
-	this->CombineDeviceData(SOMExp);	
+	this->CombineDeviceData(SOMExp);
+	
+	// Clean up after memory allocation
+	for(int i = 0; i < SOMExp.size(); i++) {
+		SOMExp.at(i)->Clear();
+	}
+	SOMExp.clear();
+	
+	// End with an output
 	std::cout<<".. Finished"<<std::endl;
 }
 
@@ -245,7 +252,7 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
  * ROW(n+1)	..		..		..
  */
 template<class Type, class Functor>
-BMUExport<Type> SOMNetGPU<Type, Functor>::hostSOMFindBMNeuronID(std::vector<SOMExport<Type>*> &SExp) {
+BMUExport<Type> SOMNetGPU<Type, Functor>::hostSOMFindBMNeuronID(std::vector<SOMExport<Type>*> &SExp, const thrust::device_vector<Type> &dvInput) {
 	BMUExport<Type> resBMU;
 	std::vector<ANNGPGPU::BMUExport<Type>> vBMUExp(SExp.size() );
 
@@ -258,8 +265,8 @@ BMUExport<Type> SOMNetGPU<Type, Functor>::hostSOMFindBMNeuronID(std::vector<SOME
 		unsigned int iDevID 	= omp_get_thread_num();
 		checkCudaErrors(cudaSetDevice(iDevID) );
 		
-		unsigned int iWidth 	= SExp.at(iDevID)->f2dEdges.GetW();
-		unsigned int iHeight 	= SExp.at(iDevID)->f2dEdges.GetH();
+		unsigned int iWidth 	= SExp.at(iDevID)->_f2dEdges.GetW();
+		unsigned int iHeight 	= SExp.at(iDevID)->_f2dEdges.GetH();
 
 		assert(iWidth 	> 0);
 		assert(iHeight 	> 0);
@@ -267,24 +274,24 @@ BMUExport<Type> SOMNetGPU<Type, Functor>::hostSOMFindBMNeuronID(std::vector<SOME
 		thrust::device_vector<Type> dvRes(iWidth, 0.f);
 
 		for(int y = 0; y < static_cast<int>(iHeight); y++) {               
-			thrust::transform(SExp.at(iDevID)->f2dEdges.GetRowBegin(y),
-				SExp.at(iDevID)->f2dEdges.GetRowEnd(y),
+			thrust::transform(SExp.at(iDevID)->_f2dEdges.GetRowBegin(y),
+				SExp.at(iDevID)->_f2dEdges.GetRowEnd(y),
 				dvRes.begin(),
 				dvRes.begin(),
-				spowAmXpY_functor<Type>((*SExp.at(iDevID)->dvInput)[y]) );
+				spowAmXpY_functor<Type>(dvInput[y]) );
 		}
 
 		if(this->m_fConscienceRate > 0.f) { 								// Implementation of conscience mechanism
 			thrust::transform(dvRes.begin(),					// input
 				dvRes.end(),							// input
-				SExp.at(iDevID)->dvConscience->begin(),				// input
+				SExp.at(iDevID)->_dvConscience.begin(),				// input
 				dvRes.begin(),							// result
 				sXmAmY_functor<Type>(1.f/(Type)iWidth) );				// functor
 
 			thrust::transform(dvRes.begin(),					// input
 				dvRes.end(),							// input
-				SExp.at(iDevID)->dvConscience->begin(),				// input
-				SExp.at(iDevID)->dvConscience->begin(),				// result
+				SExp.at(iDevID)->_dvConscience.begin(),				// input
+				SExp.at(iDevID)->_dvConscience.begin(),				// result
 				sAXmY_functor<Type>(this->m_fConscienceRate) );					// functor
 		}
 
@@ -295,7 +302,7 @@ BMUExport<Type> SOMNetGPU<Type, Functor>::hostSOMFindBMNeuronID(std::vector<SOME
 
 	resBMU = hostGetMin(vBMUExp);
 	checkCudaErrors(cudaSetDevice(resBMU.iDeviceID) );
-	resBMU.dvBMUPos = SExp.at(resBMU.iDeviceID)->f2dPositions.GetSubArrayY(resBMU.iBMUID);
+	resBMU.dvBMUPos = SExp.at(resBMU.iDeviceID)->_f2dPositions.GetSubArrayY(resBMU.iBMUID);
 
 	return resBMU;
 }
@@ -314,16 +321,11 @@ void SOMNetGPU<Type, Functor>::hostSOMPropagateBW( std::vector<SOMExport<Type>*>
 
 	// Set Input
 	std::vector<Type> vCurInput = this->GetTrainingSet()->GetInput(iPatternID);
-	for(int iDevID = 0; iDevID < static_cast<int>(SExp.size() ); iDevID++) {
-		checkCudaErrors(cudaSetDevice(iDevID) );
-
-		thrust::device_vector<Type> *p_dvInputVector = new thrust::device_vector<Type>(vCurInput.size() );
-		thrust::copy(vCurInput.begin(), vCurInput.end(), p_dvInputVector->begin() );
-		SExp[iDevID]->dvInput = p_dvInputVector;
-	}
+	thrust::device_vector<Type> dvInput(vCurInput.size() );
+	thrust::copy(vCurInput.begin(), vCurInput.end(), dvInput.begin() );
 
 	// Find BMNeuron 
-	BMUExport<Type> BMUExp = this->hostSOMFindBMNeuronID(SExp);
+	BMUExport<Type> BMUExp = this->hostSOMFindBMNeuronID(SExp, dvInput);
 
 	// Propagate BW SM 2.0
 	omp_set_num_threads(SExp.size() );  	// create as many CPU threads as there are CUDA devices
@@ -332,8 +334,8 @@ void SOMNetGPU<Type, Functor>::hostSOMPropagateBW( std::vector<SOMExport<Type>*>
 		unsigned int iDevID 	= omp_get_thread_num();
 		checkCudaErrors(cudaSetDevice(iDevID) );
 		
-		unsigned int iWidth 	= SExp.at(iDevID)->f2dPositions.GetW();
-		unsigned int iHeight 	= SExp.at(iDevID)->f2dPositions.GetH();
+		unsigned int iWidth 	= SExp.at(iDevID)->_f2dPositions.GetW();
+		unsigned int iHeight 	= SExp.at(iDevID)->_f2dPositions.GetH();
 
 		thrust::device_vector<Type> dvTmp 		(iWidth, 0.f); 			// temporary
 		thrust::device_vector<Type> dvLearningRate	(iWidth, 0.f);
@@ -343,8 +345,8 @@ void SOMNetGPU<Type, Functor>::hostSOMPropagateBW( std::vector<SOMExport<Type>*>
 		// 1a. Calc distances for all neurons to BMNeuron: Distance = sqrt(pow(x,2)+pow(y,2)+pow(z,2)+pow(n+1,2) )
 		for(int y = 0; y < static_cast<int>(iHeight); y++) { 				// for each coordinate position of the neuron
 			thrust::transform(
-				SExp.at(iDevID)->f2dPositions.GetRowBegin(y),
-				SExp.at(iDevID)->f2dPositions.GetRowEnd(y),
+				SExp.at(iDevID)->_f2dPositions.GetRowBegin(y),
+				SExp.at(iDevID)->_f2dPositions.GetRowEnd(y),
 				dvDist.begin(),
 				dvDist.begin(),
 				spowAmXpY_functor<Type>(BMUExp.dvBMUPos[y]) );
@@ -354,14 +356,14 @@ void SOMNetGPU<Type, Functor>::hostSOMPropagateBW( std::vector<SOMExport<Type>*>
 		thrust::transform(dvDist.begin(), dvDist.end(), dvDist.begin(), square_root<Type>());
 
 		// 2. calc learning rate
-		thrust::device_vector<Type> *dvLRate = SExp.at(iDevID)->dvLearningRate;
+		thrust::device_vector<Type> *dvLRate = &(SExp.at(iDevID)->_dvLearningRate);
 		thrust::transform( dvLRate->begin(),						// input
 			dvLRate->end(), 							// input
 			dvLearningRate.begin(), 						// result
 			lrate_decay_functor<Type, Functor>(this->m_iCycle, this->m_iCycles) );	// functor
 
 		// 3. Calc SigmaT^2 (already squared)
-		thrust::device_vector<Type> *dvSigma0 = SExp.at(iDevID)->dvSigma0;
+		thrust::device_vector<Type> *dvSigma0 = &SExp.at(iDevID)->_dvSigma0;
 		thrust::transform( dvSigma0->begin(),						// input
 			dvSigma0->end(), 							// input
 			dvTmp.begin(), 								// result
@@ -390,15 +392,15 @@ void SOMNetGPU<Type, Functor>::hostSOMPropagateBW( std::vector<SOMExport<Type>*>
 			thrust::less<Type>() 							// functor
 		);
 		// 5b. Use stencil to modify only neurons inside the radius
-		iWidth 	= SExp.at(iDevID)->f2dEdges.GetW();
-		iHeight = SExp.at(iDevID)->f2dEdges.GetH();
+		iWidth 	= SExp.at(iDevID)->_f2dEdges.GetW();
+		iHeight = SExp.at(iDevID)->_f2dEdges.GetH();
 		for(int y = 0; y < static_cast<int>(iHeight); y++) {				// for each edge of the neuron
-			thrust::transform_if( SExp.at(iDevID)->f2dEdges.GetRowBegin(y),		// input 1
-				SExp.at(iDevID)->f2dEdges.GetRowEnd(y), 			// input 1
+			thrust::transform_if( SExp.at(iDevID)->_f2dEdges.GetRowBegin(y),		// input 1
+				SExp.at(iDevID)->_f2dEdges.GetRowEnd(y), 			// input 1
 				dvInfl.begin(),							// input 2
 				dvTmp.begin(),							// stencil
-				SExp.at(iDevID)->f2dEdges.GetRowBegin(y), 			// result
-				hebbian_functor<Type, Functor>((*SExp.at(iDevID)->dvInput)[y]), // functor
+				SExp.at(iDevID)->_f2dEdges.GetRowBegin(y), 			// result
+				som_hebbian_functor<Type, Functor>(dvInput[y]), // functor
 				thrust::identity<int>() ); 					// predicate
 		}
 	}

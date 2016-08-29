@@ -1,17 +1,8 @@
-/*
- * F2DArray.cpp
- *
- *  Created on: 28.01.2011
- *      Author: dgrat
- */
 template <class Type>
 F2DArray<Type>::F2DArray() {
-	m_iX 	= 0;
-	m_iY 	= 0;
-	m_pArray 	= NULL;
-//	m_pSubArray = NULL;
-
-	m_bAllocated = false;
+	m_iX = 0;
+	m_iY = 0;
+	m_pArray = NULL;
 }
 
 template <class Type>
@@ -26,53 +17,30 @@ F2DArray<Type>::F2DArray(const unsigned int &iSizeX, const unsigned int &iSizeY,
 
 template <class Type>
 F2DArray<Type>::~F2DArray() {
-/*
-	if(m_bAllocated) {
-		if( m_pArray != NULL )
-			delete [] m_pArray;
-//		if(m_pSubArray != NULL)
-//			delete [] m_pSubArray;
+	if(m_pArray) {
+		delete [] m_pArray;
 	}
-*/
 }
 
 template <class Type>
 void F2DArray<Type>::Alloc(const unsigned int &iSize) {
 	assert( iSize > 0 );
-/*
-	if(m_bAllocated) {
-		if( m_pArray != NULL )
-			delete [] m_pArray;
-		if( m_pSubArray != NULL )
-			delete [] m_pSubArray;
-	}
-*/
+
 	m_iX 	= 0;
 	m_iY 	= 0;
 	m_pArray 	= new Type[iSize];
-//	m_pSubArray = NULL;
 	std::memset( m_pArray, 0, iSize*sizeof(Type) );
-	m_bAllocated = true;
 }
 
 template <class Type>
 void F2DArray<Type>::Alloc(const unsigned int &iX, const unsigned int &iY) {
 	assert( iY > 0 );
 	assert( iX > 0 );
-/*
-	if( m_bAllocated ) {
-		if( m_pArray != NULL )
-			delete [] m_pArray;
-		if( m_pSubArray != NULL )
-			delete [] m_pSubArray;
-	}
-*/
+
 	m_iX 	= iX;
 	m_iY 	= iY;
 	m_pArray 	= new Type[iX*iY];
-//	m_pSubArray = new Type[iY];
 	std::memset( m_pArray, 0, iX*iY*sizeof(Type) );
-	m_bAllocated = true;
 }
 
 template <class Type>

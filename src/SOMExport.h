@@ -46,12 +46,11 @@ struct BMUExport {
 template <class Type>
 struct SOMExport {
 // VARIABLES
-	ANNGPGPU::F2DArray<Type> f2dEdges;
-	ANNGPGPU::F2DArray<Type> f2dPositions;
-	thrust::device_vector<Type> *dvConscience;
-        thrust::device_vector<Type> *dvSigma0;
-        thrust::device_vector<Type> *dvInput;
-	thrust::device_vector<Type> *dvLearningRate;
+	ANNGPGPU::F2DArray<Type> _f2dEdges;
+	ANNGPGPU::F2DArray<Type> _f2dPositions;
+	thrust::device_vector<Type> _dvConscience;
+        thrust::device_vector<Type> _dvSigma0;
+	thrust::device_vector<Type> _dvLearningRate;
 	
 //FUNCTIONS
 	SOMExport(const ANNGPGPU::F2DArray<Type> &mEdgeMat, 
@@ -60,9 +59,10 @@ struct SOMExport {
 		  const thrust::host_vector<Type> &vSigma0,
 		  const thrust::host_vector<Type> &vLearningRate);
         
-	void SetInput(thrust::device_vector<Type> *p_dvInput);
-	void SetConscience(thrust::device_vector<Type> *p_dvConscience);
-	void SetSigma0(thrust::device_vector<Type> *p_dvSigma0);
+	void SetConscience(thrust::device_vector<Type> &dvConscience);
+	void SetSigma0(thrust::device_vector<Type> &dvSigma0);
+	
+	void Clear();
 	
 #ifdef __SOMExport_ADDON
 	#include __SOMExport_ADDON

@@ -50,7 +50,7 @@ typedef uint32_t NetTypeFlag;
  * @author Daniel "dgrat" Frenzel
  */
 template <class Type>
-class AbsNet {
+class AbsNet {	
 protected:
 	NetTypeFlag m_fTypeFlag;
 
@@ -62,16 +62,27 @@ protected:
 	AbsLayer<Type> *m_pOPLayer;				// pointer to output layer
 
 	/**
-	 * @brief Adds a layer to the network.
-	 * @param iSize Number of neurons of the layer.
-	 * @param flType Flag describing the type of the net.
+	 * @brief Adds a new layer to the network. New layer will get appended to m_lLayers.
+	 * @param pLayer Pointer to the new layer.
 	 */
-	virtual void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) = 0;
+	virtual void AddLayer(AbsLayer<Type> *pLayer);
 
 public:
 	AbsNet();
 	virtual ~AbsNet();
 
+	/**
+	 * @brief Calls FreeMemory() and clears the lists
+	 */
+	virtual void EraseAll();
+	
+	/**
+	 * @brief Adds a layer to the network.
+	 * @param iSize Number of neurons of the layer.
+	 * @param flType Flag describing the type of the net.
+	 */
+	virtual AbsLayer<Type> *AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) = 0;
+	
 	/**
 	 * @brief Creates a network in memory from container structure
 	 * @param Net container structure to create a network in memory.
@@ -113,23 +124,12 @@ public:
 	 * @param fTolerance Maximum error value (working as a break condition for early break-off)
 	 */
 	virtual std::vector<Type> TrainFromData(const unsigned int &iCycles, const Type &fTolerance, const bool &bBreak, Type &fProgress);
-
-	/**
-	 * @brief Adds a new layer to the network. New layer will get appended to m_lLayers.
-	 * @param pLayer Pointer to the new layer.
-	 */
-	virtual void AddLayer(AbsLayer<Type> *pLayer);
 	
 	/**
 	 * @brief List of all layers of the net.
 	 * @return Returns an array with pointers to every layer.
 	 */
 	virtual std::vector<AbsLayer<Type> *> GetLayers() const;
-
-	/**
-	 * @brief Deletes the complete network (all connections and all values).
-	 */
-	virtual void EraseAll();
 
 	/**
 	 * @brief Set the value of neurons in the input layer to new values

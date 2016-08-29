@@ -8,6 +8,19 @@ AbsNet<Type>::AbsNet() //: Importer(this),  Exporter(this)
 }
 
 template <class Type>
+AbsNet<Type>::~AbsNet() {
+	EraseAll();
+}
+
+template <class Type>
+void AbsNet<Type>::EraseAll() {
+	for(int i = 0; i < static_cast<int>( m_lLayers.size() ); i++) {
+		delete m_lLayers[i];
+	}
+	m_lLayers.clear();
+}
+
+template <class Type>
 void AbsNet<Type>::CreateNet(const ConTable<Type> &Net) {
 	std::cout<<"Create AbsNet()"<<std::endl;
 
@@ -102,11 +115,6 @@ void AbsNet<Type>::CreateNet(const ConTable<Type> &Net) {
 }
 
 template <class Type>
-AbsNet<Type>::~AbsNet() {
-	EraseAll();
-}
-
-template <class Type>
 void AbsNet<Type>::SetFlag(const NetTypeFlag &fType) {
 	m_fTypeFlag = fType;
 }
@@ -120,15 +128,6 @@ void AbsNet<Type>::AddFlag(const NetTypeFlag &fType) {
 template <class Type>
 LayerTypeFlag AbsNet<Type>::GetFlag() const {
 	return m_fTypeFlag;
-}
-
-template <class Type>
-void AbsNet<Type>::EraseAll() {
-	#pragma omp parallel for
-	for(int i = 0; i < static_cast<int>( m_lLayers.size() ); i++) {
-		m_lLayers.at(i)->EraseAll();
-	}
-	m_lLayers.clear();
 }
 
 template <class Type>
@@ -179,6 +178,12 @@ std::vector<Type> AbsNet<Type>::TrainFromData(const unsigned int &iCycles, const
 
 template <class Type>
 void AbsNet<Type>::AddLayer(AbsLayer<Type> *pLayer) {
+	for(int i = 0; i < m_lLayers.size(); i++) {
+		if(m_lLayers.at(i) == pLayer) {
+			return;
+		}
+	}
+
 	m_lLayers.push_back(pLayer);
 	pLayer->SetID( m_lLayers.size()-1 );
 }
@@ -253,14 +258,13 @@ Type AbsNet<Type>::SetOutput(const std::vector<Type> &outputArray) {
 
 template <class Type>
 Type AbsNet<Type>::SetOutput(const std::vector<Type> &outputArray, const unsigned int &layerID) {
-//	assert( m_lLayers[layerID]->GetFlag() & LayerOutput );
 	assert( layerID < m_lLayers.size() );
 	assert( outputArray.size() == m_lLayers[layerID]->GetNeurons().size() );
 
 	PropagateFW();
 
-	Type fError 		= 0.f;
-	Type fCurError 	= 0.f;
+	Type fError = 0.f;
+	Type fCurError = 0.f;
 	AbsNeuron<Type> *pCurNeuron = NULL;
 	for(unsigned int i = 0; i < m_lLayers[layerID]->GetNeurons().size(); i++) {
 		pCurNeuron = m_lLayers[layerID]->GetNeuron(i);
@@ -324,19 +328,6 @@ AbsLayer<Type> *AbsNet<Type>::GetOPLayer() const {
 
 	return m_pOPLayer;
 }
-/*
-const AbsLayer *AbsNet<Type>::GetIPLayer() const {
-	assert(m_pIPLayer);
-
-	return m_pIPLayer;
-}
-
-const AbsLayer *AbsNet<Type>::GetOPLayer() const {
-	assert(m_pOPLayer);
-
-	return m_pOPLayer;
-}
-*/
 
 template <class Type>
 void AbsNet<Type>::SetIPLayer(const unsigned int iID) {

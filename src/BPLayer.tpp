@@ -43,10 +43,6 @@ int BPLayer<Type, Functor>::GetZLayer() {
 }
 
 template <class Type, class Functor>
-BPLayer<Type, Functor>::~BPLayer() {
-}
-
-template <class Type, class Functor>
 void BPLayer<Type, Functor>::Resize(const unsigned int &iSize) {
 	this->EraseAll();
 	this->AddNeurons(iSize);

@@ -18,10 +18,6 @@ BPNeuron<Type, Functor>::BPNeuron(BPNeuron *pNeuron) : AbsNeuron<Type>(pNeuron) 
 }
 
 template <class Type, class Functor>
-BPNeuron<Type, Functor>::~BPNeuron() {
-}
-
-template <class Type, class Functor>
 void BPNeuron<Type, Functor>::Setup(const HebbianConf<Type> &config) {
 	m_Setup = config;
 }

@@ -9,6 +9,14 @@ AbsLayer<Type>::~AbsLayer() {
 }
 
 template <class Type>
+void AbsLayer<Type>::EraseAll() {
+	for(unsigned int i = 0; i < m_lNeurons.size(); i++) {
+		delete m_lNeurons[i];
+	}
+	m_lNeurons.clear();
+}
+
+template <class Type>
 void AbsLayer<Type>::SetID(const int &iID) {
 	m_iID = iID;
 }
@@ -21,22 +29,6 @@ int AbsLayer<Type>::GetID() const {
 template <class Type>
 const std::vector<AbsNeuron<Type> *> &AbsLayer<Type>::GetNeurons() const {
 	return m_lNeurons;
-}
-
-template <class Type>
-void AbsLayer<Type>::EraseAllEdges() {
-	for(unsigned int i = 0; i < m_lNeurons.size(); i++) {
-		m_lNeurons[i]->EraseAllEdges();
-	}
-}
-
-template <class Type>
-void AbsLayer<Type>::EraseAll() {
-	for(unsigned int i = 0; i < m_lNeurons.size(); i++) {
-		m_lNeurons[i]->EraseAllEdges();
-		delete m_lNeurons[i];
-	}
-	m_lNeurons.clear();
 }
 
 template <class Type>

@@ -39,7 +39,7 @@ private:
 	 * @return Number of cuda capable devices
 	 */
 	int GetCudaDeviceCount() const;
-	BMUExport<Type> hostSOMFindBMNeuronID(std::vector<SOMExport<Type>*> &SExp);
+	BMUExport<Type> hostSOMFindBMNeuronID(std::vector<SOMExport<Type>*> &SExp, const thrust::device_vector<Type> &dvInput);
 	void hostSOMPropagateBW( std::vector<SOMExport<Type>*> &SExp, const unsigned int &iPatternID);
 
 public:

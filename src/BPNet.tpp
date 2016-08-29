@@ -24,12 +24,10 @@ BPNet<Type, Functor>::BPNet(BPNet<Type, Functor> *pNet) //: AbsNet(pNet)
 }
 
 template <class Type, class Functor>
-BPNet<Type, Functor>::~BPNet() {
-}
-
-template <class Type, class Functor>
-void BPNet<Type, Functor>::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
-	this->AddLayer( new BPLayer<Type, Functor>(iSize, flType, -1) );
+BPLayer<Type, Functor> *BPNet<Type, Functor>::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
+	BPLayer<Type, Functor> *pRet = new BPLayer<Type, Functor>(iSize, flType, -1);
+	this->AddLayer(pRet);
+	return pRet;
 }
 
 template <class Type, class Functor>

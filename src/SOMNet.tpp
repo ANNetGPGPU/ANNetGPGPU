@@ -87,8 +87,10 @@ void SOMNet<Type, Functor>::AddLayer(AbsLayer<Type> *pLayer) {
 }
 
 template<class Type, class Functor>
-void SOMNet<Type, Functor>::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
-	AbsNet<Type>::AddLayer( new SOMLayer<Type>(iSize, flType) );
+AbsLayer<Type> *SOMNet<Type, Functor>::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
+	AbsLayer<Type> *pRet = new SOMLayer<Type>(iSize, flType);
+	AbsNet<Type>::AddLayer(pRet);
+	return pRet;
 }
 
 template<class Type, class Functor>
@@ -123,15 +125,10 @@ void SOMNet<Type, Functor>::CreateNet(const ConTable<Type> &Net) {
 }
 
 template<class Type, class Functor>
-SOMNet<Type, Functor>::~SOMNet() {
-	// TODO Auto-generated destructor stub
-}
-
-template<class Type, class Functor>
 void SOMNet<Type, Functor>::FindSigma0() {
 	SOMLayer<Type> *pLayer  = (SOMLayer<Type>*)this->GetOPLayer();
 	SOMNeuron<Type> *pNeuron = (SOMNeuron<Type>*)pLayer->GetNeuron(0);
-	unsigned int iSize 	 = pLayer->GetNeurons().size();
+	unsigned int iSize = pLayer->GetNeurons().size();
 
 	unsigned int iDim = pNeuron->GetPosition().size();
 	std::vector<Type> vDimMax(iDim, 0.f);

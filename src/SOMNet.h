@@ -102,11 +102,10 @@ protected:
 	void PropagateFW();
 
 	/**
-	 * @brief Adds a layer to the network.
-	 * @param iSize Number of neurons of the layer.
-	 * @param flType Flag describing the type of the net.
+	 * @brief Adds a new layer to the network. New layer will get appended to m_lLayers.
+	 * @param pLayer Pointer to the new layer.
 	 */
-	virtual void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
+	virtual void AddLayer(AbsLayer<Type> *pLayer);
 
 public:
 	/**
@@ -135,8 +134,6 @@ public:
 	SOMNet(	const unsigned int &iWidthI, const unsigned int &iHeightI,
 		const unsigned int &iWidthO, const unsigned int &iHeightO);
 
-	virtual ~SOMNet();
-
 	/**
 	 * @brief Defines the starting activation distance. 
 	 * Sets the initial Sigma0 value. This distance to a BMU determines whether a neuron can be influenced during a training step. 
@@ -145,10 +142,11 @@ public:
 	 void SetSigma0(const Type &fVal);
 	
 	/**
-	 * @brief Adds a new layer to the network. New layer will get appended to m_lLayers.
-	 * @param pLayer Pointer to the new layer.
+	 * @brief Adds a layer to the network.
+	 * @param iSize Number of neurons of the layer.
+	 * @param flType Flag describing the type of the net.
 	 */
-	virtual void AddLayer(AbsLayer<Type> *pLayer);
+	virtual AbsLayer<Type> *AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
 
 	/**
 	 * @brief Creates the network based on a connection table.
