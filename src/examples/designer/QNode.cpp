@@ -1,7 +1,7 @@
-#include <gui/QNode.h>
-#include <gui/QEdge.h>
-#include <gui/QViewer.h>
-#include <gui/QLayer.h>
+#include <QNode.h>
+#include <QEdge.h>
+#include <QViewer.h>
+#include <QLayer.h>
 
 
 Node::Node(Viewer *parent) {

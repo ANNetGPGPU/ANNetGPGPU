@@ -9,14 +9,14 @@
 #define QGRAPHTAB_H_
 
 #include <QtGui>
-#include <gui/3rdparty/qcustomplot.h>
+#include <3rdparty/qcustomplot.h>
 
 
 class GraphTab: public QWidget {
 	Q_OBJECT
 
 private:
-    QTabWidget *m_pTabWidget;
+	QTabWidget *m_pTabWidget;
 
 public:
 	GraphTab();

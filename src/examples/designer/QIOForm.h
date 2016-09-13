@@ -3,7 +3,7 @@
 
 #include <ANNet>
 #include <ANContainers>
-#include <gui/QTableWidget.h>
+#include <QTableWidget.h>
 #include <QtGui>
 
 
@@ -16,18 +16,18 @@ signals:
 
 public:
     explicit IOForm(QWidget *parent = 0);
-    ~IOForm();
+    virtual ~IOForm();
 
     void setNmbrOfSets(const int iNmbr);
     int getNumberOfSets() const;
 
-    ANN::TrainingSet *getTrainingSet();
-    void setTrainingSet(ANN::TrainingSet *);
+    ANN::TrainingSet<float> *getTrainingSet();
+    void setTrainingSet(ANN::TrainingSet<float> *);
 
     void reset();
 
 public slots:
-    void sl_createTables(ANN::BPNet *pNet);
+    void sl_createTables(ANN::BPNet<float, ANN::fcn_log<float>> *pNet);
     void sl_setNmbrOfSets();
 
 private:
@@ -36,8 +36,8 @@ private:
 
     unsigned int m_iDataSets;
 
-    ANN::BPNet *m_pNet;
-    ANN::TrainingSet *m_pTrainingSet;
+    ANN::BPNet<float, ANN::fcn_log<float>> *m_pNet;
+    ANN::TrainingSet<float> *m_pTrainingSet;
 
 private slots:
     void sl_send();

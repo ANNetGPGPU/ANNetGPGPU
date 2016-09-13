@@ -18,18 +18,18 @@
 // own classes
 #include <ANNet>
 #include <ANContainers>
-#include <gui/QViewer.h>
-#include <gui/QScene.h>
-#include <gui/QTrainingForm.h>
-#include <gui/QIOForm.h>
-#include <gui/QOutput.h>
-#include <gui/QGraphTab.h>
-#include <gui/QTrainingThread.h>
+#include <QViewer.h>
+#include <QScene.h>
+#include <QTrainingForm.h>
+#include <QIOForm.h>
+#include <QOutput.h>
+#include <QGraphTab.h>
+#include <QTrainingThread.h>
 
 //3rd party classes
-#include <gui/3rdparty/qcustomplot.h>
-#include <gui/3rdparty/fancytabwidget.h>
-#include <gui/3rdparty/fancyactionbar.h>
+#include <3rdparty/qcustomplot.h>
+#include <3rdparty/fancytabwidget.h>
+#include <3rdparty/fancyactionbar.h>
 
 using namespace Core;
 using namespace Core::Internal;
@@ -39,8 +39,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    ANN::BPNet *m_pANNet;
-    ANN::TrainingSet *m_pTrainingSet;
+    ANN::BPNet<float, ANN::fcn_log<float>> *m_pANNet;
+    ANN::TrainingSet<float> *m_pTrainingSet;
     TrainingThread *m_pTrainingThread;
     bool m_bBreakTraining;
     bool m_bAlreadyTrained;	// for warning dialog
@@ -122,7 +122,7 @@ private slots:
 
 public:
     MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    virtual ~MainWindow() {}
 
     void createMenus();
     void createTabs();

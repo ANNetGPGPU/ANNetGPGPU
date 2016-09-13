@@ -15,7 +15,7 @@ class TrainingForm : public QWidget
     
 public:
     explicit TrainingForm(QWidget *parent = 0);
-    ~TrainingForm();
+    virtual ~TrainingForm(); 
     
     int getMaxCycles() const;
     float getMaxError() const;

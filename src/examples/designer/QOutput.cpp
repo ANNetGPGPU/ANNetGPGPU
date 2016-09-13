@@ -5,7 +5,7 @@
  *      Author: Daniel <dgrat> Frenzel
  */
 
-#include <gui/QOutput.h>
+#include <QOutput.h>
 #include <ANContainers>
 
 
@@ -35,7 +35,7 @@ void Output::reset() {
 	m_pTableWidget->setColumnCount(0);
 }
 
-void Output::display(ANN::BPNet *pNet) {
+void Output::display(ANN::BPNet<float, ANN::fcn_log<float>> *pNet) {
 	if(!pNet)
 		return;
 

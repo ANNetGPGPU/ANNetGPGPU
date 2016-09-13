@@ -30,7 +30,7 @@
 **
 **************************************************************************/
 
-#include <gui/3rdparty/utils/stringutils.h>
+#include <stringutils.h>
 
 #include <QString>
 #include <QStringList>

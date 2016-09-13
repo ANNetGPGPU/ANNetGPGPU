@@ -1,5 +1,5 @@
-#include <gui/QEdge.h>
-#include <gui/QNode.h>
+#include <QEdge.h>
+#include <QNode.h>
 #include <cmath>
 
 static const double Pi = 3.14159265358979323846264338327950288419717;

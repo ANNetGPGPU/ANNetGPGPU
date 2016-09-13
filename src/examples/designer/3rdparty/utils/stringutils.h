@@ -33,7 +33,7 @@
 #ifndef SETTINGSTUTILS_H
 #define SETTINGSTUTILS_H
 
-#include <gui/3rdparty/utils/utils_global.h>
+#include <utils_global.h>
 
 QT_BEGIN_NAMESPACE
 class QStringList;

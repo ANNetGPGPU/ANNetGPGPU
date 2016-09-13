@@ -5,7 +5,7 @@
  *      Author: Daniel <dgrat> Frenzel
  */
 
-#include <gui/QTableWidget.h>
+#include <QTableWidget.h>
 #include <iostream>
 
 

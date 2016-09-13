@@ -1,6 +1,6 @@
-#include <gui/QIOForm.h>
+#include <QIOForm.h>
 #include <vector>
-#include <gui/3rdparty/delegate/spinboxdelegate.h>
+#include <3rdparty/delegate/spinboxdelegate.h>
 
 
 IOForm::IOForm(QWidget *parent) : QWidget(parent) {
@@ -48,11 +48,11 @@ void IOForm::sl_send() {
 	emit si_contentChanged();
 }
 
-ANN::TrainingSet *IOForm::getTrainingSet() {
+ANN::TrainingSet<float> *IOForm::getTrainingSet() {
 	if(!m_pNet || !m_pNet->GetIPLayer() || !m_pNet->GetOPLayer())
 		return NULL;
 
-	m_pTrainingSet = new ANN::TrainingSet;
+	m_pTrainingSet = new ANN::TrainingSet<float>;
 
 	unsigned int iInpColSize = m_pNet->GetIPLayer()->GetNeurons().size();
 	unsigned int iOutColSize = m_pNet->GetOPLayer()->GetNeurons().size();
@@ -83,7 +83,7 @@ ANN::TrainingSet *IOForm::getTrainingSet() {
 	return m_pTrainingSet;
 }
 
-void IOForm::setTrainingSet(ANN::TrainingSet *pTSet) {
+void IOForm::setTrainingSet(ANN::TrainingSet<float> *pTSet) {
 	if(pTSet == NULL) {
 		return;
 	}
@@ -167,7 +167,7 @@ void IOForm::reset() {
 	m_pOTable->setColumnCount(0);
 }
 
-void IOForm::sl_createTables(ANN::BPNet *pNet) {
+void IOForm::sl_createTables(ANN::BPNet<float, ANN::fcn_log<float>> *pNet) {
 	if(!pNet || !pNet->GetIPLayer() || !pNet->GetOPLayer())
 		return;
 

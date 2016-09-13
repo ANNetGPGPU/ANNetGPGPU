@@ -20,7 +20,7 @@ public:
 	Output(QWidget *parent = NULL);
 	virtual ~Output();
 
-	void display(ANN::BPNet *pNet);
+	void display(ANN::BPNet<float, ANN::fcn_log<float>> *pNet);
 	void reset();
 };
 

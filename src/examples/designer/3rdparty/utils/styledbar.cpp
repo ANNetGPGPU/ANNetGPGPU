@@ -30,8 +30,8 @@
 **
 **************************************************************************/
 
-#include <gui/3rdparty/utils/styledbar.h>
-#include <gui/3rdparty/utils/stylehelper.h>
+#include <styledbar.h>
+#include <stylehelper.h>
 
 #include <QtCore/QVariant>
 #include <QtGui/QPainter>

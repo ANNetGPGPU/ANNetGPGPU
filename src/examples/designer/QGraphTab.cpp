@@ -5,7 +5,7 @@
  *      Author: Daniel <dgrat> Frenzel
  */
 
-#include <gui/QGraphTab.h>
+#include <QGraphTab.h>
 
 
 GraphTab::GraphTab() {

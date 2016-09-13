@@ -1,9 +1,9 @@
-#include <gui/QScene.h>
-#include <gui/QNode.h>
-#include <gui/QEdge.h>
-#include <gui/QLayer.h>
-#include <gui/QLabel.h>
-#include <gui/QZLabel.h>
+#include <QScene.h>
+#include <QNode.h>
+#include <QEdge.h>
+#include <QLayer.h>
+#include <QLabel.h>
+#include <QZLabel.h>
 #include <ANMath>
 #include <ANContainers>
 #include <iostream>
@@ -12,10 +12,10 @@
 
 Scene::Scene(QObject *parent) : QGraphicsScene(parent)
 {
-	m_pANNet = new ANN::BPNet;
+	m_pANNet = new ANN::BPNet<float, ANN::fcn_log<float>>;
 }
 
-ANN::BPNet *Scene::getANNet(bool bDial) {
+ANN::BPNet<float, ANN::fcn_log<float>> *Scene::getANNet(bool bDial) {
 	m_pANNet->EraseAll();
 
 	int LayerTypeFlag 	= -1;
@@ -62,7 +62,7 @@ ANN::BPNet *Scene::getANNet(bool bDial) {
    /**
 	* Build connections
 	*/
-	ANN::ConTable Net;
+	ANN::ConTable<float> Net;
 	Net.NetType 	= ANN::ANNetBP;
 	Net.NrOfLayers 	= m_lLayers.size();
 
@@ -72,18 +72,18 @@ ANN::BPNet *Scene::getANNet(bool bDial) {
 		Net.TypeOfLayer.push_back(pLayer->getLabel()->getType() );
 
 		foreach(Node *pNode, pLayer->nodes() ) {
-			ANN::NeurDescr neuron;
+			ANN::NeurDescr<float> neuron;
 			neuron.m_iLayerID 		= pLayer->getID();
 			neuron.m_iNeurID 		= pNode->getID();
 			Net.Neurons.push_back(neuron);
 
 			foreach(Edge *pEdge, pNode->edgesO() ) {
-				ANN::ConDescr edge;
+				ANN::ConDescr<float> edge;
 				edge.m_iSrcLayerID 	= pEdge->sourceNode()->getLayer()->getID();
 				edge.m_iDstLayerID 	= pEdge->destNode()->getLayer()->getID();
 				edge.m_iSrcNeurID 	= pEdge->sourceNode()->getID();
 				edge.m_iDstNeurID 	= pEdge->destNode()->getID();
-				edge.m_fVal 		= ANN::RandFloat(-0.5f, 0.5f);
+				edge.m_fVal 		= ANN::GetRandReal<float>(-0.5f, 0.5f);
 
 				Net.NeurCons.push_back(edge);
 			}
@@ -92,7 +92,7 @@ ANN::BPNet *Scene::getANNet(bool bDial) {
 	// Delete old and create new ANN::BPNet
 	if(m_pANNet)
 		delete m_pANNet;
-	m_pANNet = new ANN::BPNet;
+	m_pANNet = new ANN::BPNet<float, ANN::fcn_log<float>>;
 	m_pANNet->CreateNet(Net);
 
     // Update ANN::BPNet
@@ -101,14 +101,14 @@ ANN::BPNet *Scene::getANNet(bool bDial) {
 	return m_pANNet;
 }
 
-void Scene::setANNet(ANN::BPNet &Net) {
+void Scene::setANNet(ANN::BPNet<float, ANN::fcn_log<float>> &Net) {
 	m_pANNet = &Net;
 	int iZLayer = 0;
 
 	// Add layers to the scene
-	foreach(ANN::AbsLayer *pLayer, m_pANNet->GetLayers()) {
+	foreach(ANN::AbsLayer<float> *pLayer, m_pANNet->GetLayers()) {
 		Layer *pSceneLayer = addLayer(	pLayer->GetNeurons().size(),
-										QPointF(5000+ANN::RandFloat(-250, 250), 5000+ANN::RandFloat(-250, 250)),
+										QPointF(5000+ANN::GetRandReal<float>(-250, 250), 5000+ANN::GetRandReal<float>(-250, 250)),
 										"Type not set!");
 
 		pSceneLayer->getLabel()->setType(pLayer->GetFlag());
@@ -125,19 +125,19 @@ void Scene::setANNet(ANN::BPNet &Net) {
 			}
 			else {
 				while(pSceneOne->collidesWithItem(pSceneOther) ) {
-					pSceneOther->shift(ANN::RandFloat(-250, 250), ANN::RandFloat(-250, 250));
+					pSceneOther->shift(ANN::GetRandReal<float>(-250, 250), ANN::GetRandReal<float>(-250, 250));
 				}
 			}
 		}
 	}
 
 	// Setup edges
-	foreach(ANN::AbsLayer *pLayer, m_pANNet->GetLayers() ) {
-		foreach(ANN::AbsNeuron *pNeuron, pLayer->GetNeurons() ) {
+	foreach(ANN::AbsLayer<float> *pLayer, m_pANNet->GetLayers() ) {
+		foreach(ANN::AbsNeuron<float> *pNeuron, pLayer->GetNeurons() ) {
 			int iLayerID 	= pLayer->GetID();
 			int iNeurID 	= pNeuron->GetID();
 
-			foreach(ANN::Edge *pEdge, pNeuron->GetConsO() ) {
+			foreach(ANN::Edge<float> *pEdge, pNeuron->GetConsO() ) {
 				int iSrcLayerID 	= iLayerID;
 				int iDstLayerID 	= pEdge->GetDestination(pNeuron)->GetParent()->GetID();
 				int iSrcNeurID 		= iNeurID;

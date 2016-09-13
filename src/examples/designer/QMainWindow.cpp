@@ -5,13 +5,13 @@
 	#include <assert.h>
 #endif
 
-#include <gui/QEdge.h>
-#include <gui/QNode.h>
-#include <gui/QLayer.h>
-#include <gui/QMainWindow.h>
-#include <gui/3rdparty/utils/stylehelper.h>
-#include <gui/3rdparty/utils/manhattanstyle.h>  //"manhattanstyle.h"
-#include <gui/QTrainingThread.h>
+#include <QEdge.h>
+#include <QNode.h>
+#include <QLayer.h>
+#include <QMainWindow.h>
+#include <3rdparty/utils/stylehelper.h>
+#include <3rdparty/utils/manhattanstyle.h>  //"manhattanstyle.h"
+#include <QTrainingThread.h>
 #include <ANMath>
 #include <ANContainers>
 
@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent)
 	QObject::connect(m_pTrainingThread, SIGNAL(finished() ), this, SLOT(sl_switchStartStopTraining()) );
 	QObject::connect(m_pTrainingThread, SIGNAL(started() ), this, SLOT(sl_switchStartStopTraining()) );
 
-    connect(m_pViewer->getScene(), SIGNAL(si_netChanged(ANN::BPNet *)), m_pInputDial, SLOT(sl_createTables(ANN::BPNet *)) );
+    connect(m_pViewer->getScene(), SIGNAL(si_netChanged(ANN::BPNet<float, ANN::fcn_log<float>> *)), m_pInputDial, SLOT(sl_createTables(ANN::BPNet<float, ANN::fcn_log<float>> *)) );
     connect(m_pTabBar, SIGNAL(currentChanged(int)), this, SLOT(sl_tabChanged(int)) );
     connect(m_pInputDial, SIGNAL(si_contentChanged()), this, SLOT(sl_setTrainingSet()) );
 
@@ -128,11 +128,6 @@ void MainWindow::sl_tabChanged(int iTab) {
 
 	    m_pSetTrainingPairs->setDisabled(true);
 	}
-}
-
-MainWindow::~MainWindow()
-{
-    
 }
 
 QCustomPlot *MainWindow::createGraph(	float fXmin, float fXmax,
@@ -282,7 +277,7 @@ void MainWindow::sl_loadANNet() {
 		// Remove all of the old content from screen
 		m_pViewer->getScene()->clearAll();
 		// Create a new net in memory
-		m_pANNet = new ANN::BPNet;
+		m_pANNet = new ANN::BPNet<float, ANN::fcn_log<float>>;
 		m_pANNet->ImpFromFS(fileName.toStdString());
 		// Load content from net to the screen
 		m_pViewer->getScene()->setANNet(*m_pANNet);
@@ -566,11 +561,9 @@ void MainWindow::sl_startTraining() {
 		m_bAlreadyTrained = true;
 		m_vErrors.clear();
 
-		m_pANNet->SetLearningRate(fLearningRate);
-		m_pANNet->SetMomentum(fMomentum);
-		m_pANNet->SetWeightDecay(fWeightDecay);
-		m_pANNet->SetTransfFunction(ANN::Functions::ResolveTransfFByName(sTFunct.data()));
-
+		ANN::HebbianConf<float> conf = {fLearningRate, fMomentum, fWeightDecay};
+		m_pANNet->Setup(conf);
+		
 		m_pANNet->SetTrainingSet(m_pTrainingSet);
 
 		m_pTrainingThread->setNet(m_pANNet, iCycles, fMaxError, m_bBreakTraining);

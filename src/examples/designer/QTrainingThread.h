@@ -14,7 +14,7 @@
 
 class TrainingThread: public QThread {
 private:
-	ANN::BPNet *m_pNet;
+	ANN::BPNet<float, ANN::fcn_log<float>> *m_pNet;
 	int m_iCycles;
 	float m_fError;
 	float m_fProgress;
@@ -27,7 +27,7 @@ public:
 	TrainingThread(QObject *parent = NULL);
 	virtual ~TrainingThread();
 
-	void setNet(ANN::BPNet *pNet, int iCycles, float fError, bool &bBreak);
+	void setNet(ANN::BPNet<float, ANN::fcn_log<float>> *pNet, int iCycles, float fError, bool &bBreak);
 	std::vector<float> getErrors() const;
 	float getProgress() const;
 

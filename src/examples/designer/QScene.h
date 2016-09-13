@@ -31,20 +31,21 @@ private:
     QList<Edge*> m_lEdges;
     QList<Layer*> m_lLayers;
 
-    ANN::BPNet *m_pANNet;
+    ANN::BPNet<float, ANN::fcn_log<float>> *m_pANNet;
 
     void refreshLayerIDs();
 
 signals:
-	void si_netChanged(ANN::BPNet *m_pANNet);
+	void si_netChanged(ANN::BPNet<float, ANN::fcn_log<float>> *m_pANNet);
 
 public:
     Scene(QObject *parent = 0);
+    virtual ~Scene() {}
 
     void clearAll();
 
-    ANN::BPNet *getANNet(bool bDial = true);
-    void setANNet(ANN::BPNet &);
+    ANN::BPNet<float, ANN::fcn_log<float>> *getANNet(bool bDial = true);
+    void setANNet(ANN::BPNet<float, ANN::fcn_log<float>> &);
 
     void addEdge(Edge*);
     void removeEdge(Edge*);

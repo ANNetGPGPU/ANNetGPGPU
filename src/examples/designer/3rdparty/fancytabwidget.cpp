@@ -30,9 +30,9 @@
 **
 **************************************************************************/
 
-#include <gui/3rdparty/fancytabwidget.h>
-#include <gui/3rdparty/utils/stylehelper.h>
-#include <gui/3rdparty/utils/styledbar.h>
+#include <fancytabwidget.h>
+#include <stylehelper.h>
+#include <styledbar.h>
 
 #include <QtCore/QDebug>
 

@@ -5,7 +5,7 @@
  *      Author: dgrat
  */
 
-#include <gui/QZLabel.h>
+#include <QZLabel.h>
 
 
 ZLabel::ZLabel() {

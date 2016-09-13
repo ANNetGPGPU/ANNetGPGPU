@@ -1,4 +1,4 @@
-#include <gui/QLabel.h>
+#include <QLabel.h>
 #include <QtCore>
 #include <ANNet>
 

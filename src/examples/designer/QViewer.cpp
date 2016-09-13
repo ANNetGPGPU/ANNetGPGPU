@@ -1,9 +1,9 @@
-#include <gui/QViewer.h>
-#include <gui/QNode.h>
-#include <gui/QEdge.h>
-#include <gui/QLayer.h>
-#include <gui/QLabel.h>
-#include <gui/QScene.h>
+#include <QViewer.h>
+#include <QNode.h>
+#include <QEdge.h>
+#include <QLayer.h>
+#include <QLabel.h>
+#include <QScene.h>
 #include <iostream>
 
 

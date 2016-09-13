@@ -45,7 +45,7 @@
      using a spin box widget.
  */
 
- #include <gui/3rdparty/delegate/spinboxdelegate.h>
+ #include <spinboxdelegate.h>
 
  
  SpinBoxDelegate::SpinBoxDelegate(QObject *parent)

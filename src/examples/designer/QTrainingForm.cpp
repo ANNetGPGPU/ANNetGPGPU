@@ -1,4 +1,4 @@
-#include <gui/QTrainingForm.h>
+#include <QTrainingForm.h>
 #include <ui_QTrainingForm.h>
 
 

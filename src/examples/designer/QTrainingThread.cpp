@@ -5,7 +5,7 @@
  *      Author: Daniel <dgrat> Frenzel
  */
 
-#include <gui/QTrainingThread.h>
+#include <QTrainingThread.h>
 
 
 TrainingThread::TrainingThread(QObject *parent) : QThread(parent) {
@@ -20,7 +20,7 @@ TrainingThread::~TrainingThread() {
 	// TODO Auto-generated destructor stub
 }
 
-void TrainingThread::setNet(ANN::BPNet *pNet, int iCycles, float fError, bool &bBreak) {
+void TrainingThread::setNet(ANN::BPNet<float, ANN::fcn_log<float>> *pNet, int iCycles, float fError, bool &bBreak) {
 	m_pNet 		= pNet;
 	m_iCycles 	= iCycles;
 	m_fError 	= fError;
