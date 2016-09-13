@@ -1,3 +1,13 @@
+# Updates - 09/03/2016
+
+- Improvements of the implementation of the base classes
+- Added a Qt4 demo, illustrating how to implement a GUI on the example of a back-propagation network 
+  - Note that the networks can be highly asymmetrical
+
+![artw_i](https://cloud.githubusercontent.com/assets/4668178/18225607/b8ddff64-71f6-11e6-872f-78c3b0450717.png)
+__GUI-example: Designer for back propagation networks.__ The layout of the underlying library is 1:1 represented as a QSceneGraph. After definition of the network topology, the in- and output can be defined by the user and the network trained accordingly. At the end, the error of each test-training cycle is plotted, which gives a handy representation of the network performance.
+
+
 # Updates - 07/31/2016
 
 - The project was rewritten into a template library
@@ -6,7 +16,7 @@
 - All classes but SOMNetGPU are now header only
 - A bug with SOMs on GPU was fixed, which led to wrong results of the radius decay function
 
-Here is the new device pointer replacement. The distance function is now a template argument. Guess, this will make things easier in future.
+Here is an example of the new device pointer replacement. The distance function of the network is now a template argument, which will simplify library functionality extensions.
 
 ```
 int main(int argc, char *argv[]) {
@@ -21,21 +31,18 @@ int main(int argc, char *argv[]) {
 # Projects
 ## Artwork from Ben Bogart
 
-![artw_i](http://www.ekran.org/ben/wp/wp-content/uploads/2016/05/SOMResults_noSegmentation_SOMScale5_h1352_ns200_i1000000-scaler8.jpg)
-__This image is from [ekran.org](http://www.ekran.org/ben/wp/2016/results-without-segmentation/#more-3490) and shows a panorama after several training cycles of a SOM__
-
-![artw_i](http://www.ekran.org/ben/wp/wp-content/uploads/2016/03/still-proxy-pano-edit-montage-5_500-1_0.5-SOM-100000.jpg)
-__Arranged composition of SOMs from [ekran.org](http://www.ekran.org/ben/wp/2016/03/)__
+[![Image decomposition](https://cloud.githubusercontent.com/assets/4668178/18225709/9fe765e2-71f9-11e6-8846-1c47de4ad4f2.png)](https://player.vimeo.com/video/181111922?autoplay=1&loop=1&title=0&byline=0&portrait=0)
+__This video is from [ekran.org](http://www.ekran.org/ben/wp/2016/09/) and shows the decomposition of a high resolution panorama by a SOM on the GPU__
 
 ![artw_i](http://www.ekran.org/ben/wp/wp-content/uploads/2016/07/good_result_24mm-final-detail-11.jpg)
-__Linewise growing neighbourhood from [ekran.org](http://www.ekran.org/ben/wp/2016/03/)__
+__Linewise growing neighborhood from [ekran.org](http://www.ekran.org/ben/wp/2016/03/)__
 
 # Introduction
 
 ANNet is a small library to create neural nets. A hallmark of the project are implementations of several neural network models with usage of OpenMP and/or Thrust. 
 See quickstart guide to learn how to use them. 
 Especially self organizing maps (SOMs) benefit strongly from calculations on GPUs and speed-ups by a factor of 100 can easily be achieved for bigger networks (>256x256 nodes). 
-The GPU implementation of SOMs is also supporting asynchronous calculation on more than one device. So computation on clusters is possible.
+The GPU implementation of SOMs is also supporting asynchronous calculation on more than one device. 
 
 # Features
 - Implementation:
@@ -44,7 +51,7 @@ The GPU implementation of SOMs is also supporting asynchronous calculation on mo
 - Python interface for all classes
 - Multi core support using OpenMP
 - Plugin system based on template parameters
-- With the exception of the CUDA stuff, this project is a header only library
+- With the exception of the CUDA implementation, this project is a header only library
 
 # Build
 
@@ -56,7 +63,7 @@ To build the library with all features you need:
 - Doxygen (required for documentation generation)
 - OpenMP (required if multi CPU support is wished)
 - Lib bzip2 (required)
-- CMake (required if you want to use the cmake scripts)
+- CMake (required if you want to use the CMake scripts)
 - A C++ compiler (GCC or MinGW; required)
 - How you build the library:
 
@@ -74,7 +81,7 @@ mkdir build
 cd build
 ```
 
-Run cmake and make to build. Dependent on the installed libraries, either all or just some example programs will be built:
+Run CMake and make to build. Dependent on the installed libraries, either all or just some example programs will be built:
 
 ```
 cmake .. && make
@@ -190,7 +197,7 @@ For the gpu implementation, a vector is created based on the connection graph.
 #include <ANContainers>
 #include <ANMath>
 
-#include "Samples.h"
+#include <Samples.h>
 
 #include <ctime>
 #include <iostream>
@@ -198,22 +205,18 @@ For the gpu implementation, a vector is created based on the connection graph.
 
 int main(int argc, char *argv[]) {
 	ANN::BPNet<float, ANN::fcn_log<float>> cpu_one;
+        
+	ANN::BPLayer<float, ANN::fcn_log<float>> *layer1 = cpu_one.AddLayer(56, ANN::ANLayerInput);
+	ANN::BPLayer<float, ANN::fcn_log<float>> *layer2 = cpu_one.AddLayer(64, ANN::ANLayerHidden);
+	ANN::BPLayer<float, ANN::fcn_log<float>> *layer3 = cpu_one.AddLayer(9, ANN::ANLayerOutput);
+
+	layer1->ConnectLayer(layer2);
+	layer2->ConnectLayer(layer3);
 	
-	ANN::BPLayer<float, ANN::fcn_log<float>> layer1(56, ANN::ANLayerInput);
-	ANN::BPLayer<float, ANN::fcn_log<float>> layer2(64, ANN::ANLayerHidden);
-	ANN::BPLayer<float, ANN::fcn_log<float>> layer3(9, ANN::ANLayerOutput);
-
-	layer1.ConnectLayer(&layer2);
-	layer2.ConnectLayer(&layer3);
-		
-	cpu_one.AddLayer(&layer1);
-	cpu_one.AddLayer(&layer2);
-	cpu_one.AddLayer(&layer3);
-
 	ANN::TrainingSet<float> input;
 	input.AddInput(fInp1, 56);
 	input.AddOutput(fOut1, 9);
-	// ..
+	// .. more input/output samples
 	
 	std::vector<float> errors;
 	
@@ -234,10 +237,11 @@ int main(int argc, char *argv[]) {
 	std::cout<< &cpu_two <<std::endl;
 	return 0;
 }
+
 ```
 
-HebbianConf is a small struct storing the learning rates of the network.
-A zero will disbale the related procdure, thus in the demo the weight decay and momentum term is disables.
+HebbianConf is a small struct storing the learning rates and related constants of the network.
+A zero will automatically disable the related procedure like the momentum term, or weight decay during training.
 
 ```
 template <class T>
@@ -254,7 +258,7 @@ struct HebbianConf {
 
 Self-organizing maps (SOM) are a type of network that is trained using unsupervised learning to produce a low-dimensional (typically two-dimensional), 
 representation of training samples. 
-SOMs are different from other networks in the sense that they use a neighbourhood function for learning. 
+SOMs are different from other networks in the sense that they use a neighborhood function for learning. 
 The example shows a SOM 128x128 node network, each node can process a 3x1 input vector.
 
 ```
@@ -317,7 +321,7 @@ void your_new_function() { }  // your custom function ..
 ```
 
 Then we just need to pass the path of this file to the build system.
-In cmake, this would look like this.
+In CMake, this would look like this.
 
 ```
 add_definitions(-D__ConTable_ADDON="${SOM_GPU_ADDON_SOURCE_DIR}/foo.h")
@@ -406,7 +410,7 @@ template ANNGPGPU::SOMNetGPU<float, custom_functor<float> >::SOMNetGPU();
 template ANNGPGPU::SOMNetGPU<double, custom_functor<double> >::SOMNetGPU();
 // ..
 ```
-then we adapt the cmake build file and add the following lines:
+then we adapt the CMake build file and add the following lines:
 
 ```
 # here we pass the extension headers to the build system
@@ -568,7 +572,7 @@ void BPNet<Type, Functor>::AddLayer(const unsigned int &iSize, const LayerTypeFl
 If you decide to create your own e.g. Layer class, then you probably want to add features which require to be stored on the hdd. 
 For this the ExpToFS() and ImpFromFS() functions are required to get modified. This works more or less like reimplementing virtual functions in Qt.
 Calling the virtual base class ensures to save the base class contents. 
-The following example shows how the freshly inserted integer storing the layer depth in a back propagation network can be saved and recoverd from the hdd. 
+The following example shows how the freshly inserted integer storing the layer depth in a back propagation network can be saved and recovered from the hdd. 
 
 ```
 template <class Type, class Functor>
@@ -598,7 +602,7 @@ int BPLayer<Type, Functor>::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable<Typ
 ```
 
 The last function which has to be implemented is CreateNet(). 
-Here the content loaded from the filesystem is used to create a copy of the net in the memory. 
+Here the content loaded from the file system is used to create a copy of the net in the memory. 
 The base implementation creates the layers and the connections of the network, so we just have to implement the bias neuron.
 
 ```
