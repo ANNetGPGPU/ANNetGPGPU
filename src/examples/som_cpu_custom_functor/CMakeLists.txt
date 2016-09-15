@@ -17,4 +17,7 @@ INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/gpgpu)
 
 # Build misc examples
 ADD_EXECUTABLE (som_cpu_custom_functor som_cpu_custom_functor.cpp)
-TARGET_LINK_LIBRARIES (som_cpu_custom_functor ANNet SOMReader) 
+TARGET_LINK_LIBRARIES (som_cpu_custom_functor ${BZIP2_LIBRARIES} SOMReader) 
+IF(OPENMP_FOUND)
+  TARGET_LINK_LIBRARIES (som_cpu_custom_functor -lgomp)
+ENDIF(OPENMP_FOUND)

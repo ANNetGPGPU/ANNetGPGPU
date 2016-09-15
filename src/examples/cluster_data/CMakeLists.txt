@@ -25,4 +25,7 @@ LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_20;-std=c++11;-O2;-DVERBOSE")
 
 # Build misc examples
 CUDA_ADD_EXECUTABLE (clustering clustering.cpp)
-TARGET_LINK_LIBRARIES (clustering ANNet SOMReader) 
+TARGET_LINK_LIBRARIES (clustering SOMReader ${BZIP2_LIBRARIES})
+IF(OPENMP_FOUND)
+  TARGET_LINK_LIBRARIES (clustering -lgomp)
+ENDIF(OPENMP_FOUND)

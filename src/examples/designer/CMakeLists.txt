@@ -50,6 +50,8 @@ SET( ANGUISourceFiles
 )
 
 ADD_EXECUTABLE (ANNetDesigner ANNetDesigner.cpp ${ANGUISourceFiles} ${3rdPartySourceFiles})
-TARGET_LINK_LIBRARIES (ANNetDesigner ANNet Qt4::QtGui Qt4::QtCore) 
-
+TARGET_LINK_LIBRARIES (ANNetDesigner Qt4::QtGui Qt4::QtCore ${BZIP2_LIBRARIES})
+IF(OPENMP_FOUND)
+  TARGET_LINK_LIBRARIES (ANNetDesigner -lgomp)
+ENDIF(OPENMP_FOUND)
 FILE(COPY ${ANNetDesigner_SOURCE_DIR}/gfx DESTINATION ${ANNetDesigner_BINARY_DIR})
