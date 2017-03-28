@@ -50,7 +50,7 @@ static std::default_random_engine __RAND_GEN(std::time(0));
 
 template <class T>
 inline T GetRandReal(T min, T max) {
-	static std::uniform_real_distribution<T> __RAND_DIST(min, max);
+	std::uniform_real_distribution<T> __RAND_DIST(min, max);
 	return __RAND_DIST(__RAND_GEN);
 }
 
