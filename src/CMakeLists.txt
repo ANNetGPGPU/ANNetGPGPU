@@ -3,6 +3,8 @@
 # to the root binary directory of the project as ${ANNetGPU_SOURCE_DIR}.
 PROJECT (ANNetGPGPU)
 
+option(VERBOSE "VERBOSE" ON)
+
 # Make sure the compiler can find include files from our ANNet library.
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR})
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/math)
@@ -22,14 +24,21 @@ SET( ANCUDASourceFiles
 IF(OPENMP_FOUND)
   MESSAGE(STATUS "\t-OpenMP found. We will link the library against -lgomp")
 
-  add_compile_options(${OpenMP_CXX_FLAGS}) 
+  add_compile_options(${OpenMP_CXX_FLAGS})
+  IF(VERBOSE)
+    add_compile_options(-DVERBOSE)
+  ENDIF(VERBOSE)
   SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 ENDIF()
 
 IF (CUDA_FOUND)
   MESSAGE(STATUS "\t-CUDA found. We will build the library with GPGPU support.")
 
-  LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_20;-std=c++11;-O2;-DVERBOSE")
+  LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_30;-std=c++11;-O2")
+  IF(VERBOSE)
+    LIST(APPEND CUDA_NVCC_FLAGS "-DVERBOSE")
+  ENDIF(VERBOSE)
+  
   ADD_DEFINITIONS("-DCUDA") # needed for conditional compilation of some files
   CUDA_ADD_LIBRARY (ANNet ${ANCUDASourceFiles} ${BZIP_INCLUDE_DIRS} OPTIONS -D __CUDA_CAB__=${__CUDA_CAB__})
   TARGET_LINK_LIBRARIES (ANNet ${BZIP2_LIBRARIES})

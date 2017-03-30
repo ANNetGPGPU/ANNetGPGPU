@@ -28,7 +28,7 @@ SOMNeuron<Type>::SOMNeuron(SOMLayer<Type> *parent) : AbsNeuron<Type>(parent) {
 
 template <class Type>
 void SOMNeuron<Type>::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
-	std::cout<<"Save SOMNeuron to FS()"<<std::endl;
+	ANN::printf("Save SOMNeuron to FS\n");
 	AbsNeuron<Type>::ExpToFS(bz2out, iBZ2Error);
 
 	BZ2_bzWrite( &iBZ2Error, bz2out, &m_fLearningRate, sizeof(Type) );
@@ -37,7 +37,7 @@ void SOMNeuron<Type>::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
 
 template <class Type>
 void SOMNeuron<Type>::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable<Type> &Table) {
-	std::cout<<"Load SOMNeuron to FS()"<<std::endl;
+	ANN::printf("Load SOMNeuron from FS\n");
 	AbsNeuron<Type>::ImpFromFS(bz2in, iBZ2Error, Table);
 
 	Type 	fLearningRate; // learning rate

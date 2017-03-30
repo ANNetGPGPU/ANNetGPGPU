@@ -154,7 +154,7 @@ void BPLayer<Type, Functor>::ImpMomentumsEdgesOut(const F2DArray<Type> &mat) {
 
 template <class Type, class Functor>
 void BPLayer<Type, Functor>::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
-	std::cout<<"Save BPLayer to FS()"<<std::endl;
+	ANN::printf("Save BPLayer to FS\n");
 	AbsLayer<Type>::ExpToFS(bz2out, iBZ2Error);
 
 	int iZLayer = m_iZLayer;
@@ -163,7 +163,7 @@ void BPLayer<Type, Functor>::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
 
 template <class Type, class Functor>
 int BPLayer<Type, Functor>::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable<Type> &Table) {
-	std::cout<<"Load BPLayer from FS()"<<std::endl;
+	ANN::printf("Load BPLayer from FS\n");
 	int iLayerID = AbsLayer<Type>::ImpFromFS(bz2in, iBZ2Error, Table);
 
 	int iZLayer = -1;

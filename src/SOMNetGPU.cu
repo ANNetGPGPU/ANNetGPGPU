@@ -61,7 +61,7 @@ int SOMNetGPU<Type, Functor>::GetCudaDeviceCount() const {
 	int iGPU_N 	= 0; 	// device number
 	int iSM20_N 	= 0; 	// number of devices with SM >= 2.0 
 
-	printf("Check for CUDA-capable devices: ");
+	ANN::printf("Check for CUDA-capable devices: ");
 	checkCudaErrors(cudaGetDeviceCount(&iGPU_N) );
 	if (iGPU_N > MAX_GPU_COUNT) {
 	    iGPU_N = MAX_GPU_COUNT;
@@ -77,11 +77,11 @@ int SOMNetGPU<Type, Functor>::GetCudaDeviceCount() const {
 	iGPU_N = iSM20_N;
 	
 	if(!iGPU_N) {
-		printf("FAIL\nProgram will be terminated because no compatible hardware found\n");
+		ANN::printf("FAIL\nProgram will be terminated because no compatible hardware found\n");
 		exit(-1); // No GPU found
 	}
 
-	printf("SUCCESS\nCUDA SM 2.0 capable device count: %i\n", iGPU_N);
+	ANN::printf("SUCCESS\nCUDA SM 2.0 capable device count: %i\n", iGPU_N);
 	return iGPU_N;
 }
 
@@ -99,7 +99,6 @@ std::vector<SOMExport<Type>*> SOMNetGPU<Type, Functor>::SplitDeviceData() const 
 	}
 	
 	std::vector<SOMExport<Type>*> vRes(iDeviceCount);
-	//printf("Computing with %d GPUs ..\n", iDeviceCount);
 	for(int i = 0; i < iDeviceCount; i++) { 
 		checkCudaErrors(cudaSetDevice(i) );
 	  
@@ -116,12 +115,12 @@ std::vector<SOMExport<Type>*> SOMNetGPU<Type, Functor>::SplitDeviceData() const 
 			hvSigma0[j]     = ((ANN::SOMNeuron<Type>*)pLayer->GetNeuron(j+iStart))->GetSigma0();
 			hvLearningRates[j] = ((ANN::SOMNeuron<Type>*)pLayer->GetNeuron(j+iStart))->GetLearningRate();
 		}
+		ANN::printf(".. Copy edges from host to device: %d/%d\n", i+1, iDeviceCount);
 
-		printf(".. Copy edges from host to device: %d/%d\n", i+1, iDeviceCount);
 		ANN::F2DArray<Type> h2dEdges = pLayer->ExpEdgesIn(iStart, iStop);
 		F2DArray<Type> d2dEdges(h2dEdges.GetW(), h2dEdges.GetH(), h2dEdges.ToDevice() );
-		
-		printf(".. Copy positions from host to device: %d/%d\n", i+1, iDeviceCount);
+
+		ANN::printf(".. Copy positions from host to device: %d/%d\n", i+1, iDeviceCount);
 		ANN::F2DArray<Type> h2dPositions = pLayer->ExpPositions(iStart, iStop);
 		F2DArray<Type> d2dPositions(h2dPositions.GetW(), h2dPositions.GetH(), h2dPositions.ToDevice() );
 		
@@ -158,8 +157,8 @@ void SOMNetGPU<Type, Functor>::CombineDeviceData(std::vector<SOMExport<Type>*> &
 		for(unsigned int j = 0; j <= iStop-iStart; j++) {
 			this->m_pOPLayer->GetNeuron(j+iStart)->SetValue((SExp.at(i)->_dvConscience)[j]);
 		}
-		
-		printf(".. Copy edges from device to host: %d/%d\n", i+1, iDeviceCount);
+
+		ANN::printf(".. Copy edges from device to host: %d/%d\n", i+1, iDeviceCount);
 		// Copy weights between neurons of the input and output layer
 		pLayer->ImpEdgesIn(SExp.at(i)->_f2dEdges, iStart, iStop);
 		
@@ -210,12 +209,11 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
 		return;
 	}
 
-	printf("Copy memory from host to device ..\n");
+	ANN::printf("Copy memory from host to device ..\n");
 	std::vector<SOMExport<Type>*> SOMExp = this->SplitDeviceData();
 
 	StartTimer();
-
-	printf("Calculate SOM ..\n");
+	ANN::printf("Calculate SOM ..\n");
 	int iMin = 0;
 	int iMax = this->GetTrainingSet()->GetNrElements()-1;
 	int iProgCount = 1;
@@ -223,12 +221,18 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
 	for(this->m_iCycle = 0; this->m_iCycle < static_cast<int>(this->m_iCycles); this->m_iCycle++) {
 		if(this->m_iCycles >= 10) {
 			if(((this->m_iCycle+1) / (this->m_iCycles/10)) == iProgCount && (this->m_iCycle+1) % (this->m_iCycles/10) == 0) {
-				std::cout<<"Current training progress calculated by the GPU is: "<<iProgCount*10.f<<"%/Step="<<this->m_iCycle+1<<std::endl;
+				ANN::printf("Current training progress calculated by the GPU: %f%%/Step: %d/%d\n", 
+							this->m_iCycle+1, 
+							this->m_iCycle+1, 
+							this->m_iCycles);
 				iProgCount++;
 			}
 		} 
 		else {
-			std::cout<<"Current training progress calculated by the CPU is: "<<(float)(this->m_iCycle+1.f)/(float)this->m_iCycles*100.f<<"%/Step="<<this->m_iCycle+1<<std::endl;
+			ANN::printf("Current training progress calculated by the GPU: %f%%/Step: %d/%d\n", 
+						(float)(this->m_iCycle+1.f)/(float)this->m_iCycles*100.f, 
+						this->m_iCycle+1, 
+						this->m_iCycles);
 		}
 		
 		if(eMode == ANN::ANRandomMode) {
@@ -242,11 +246,10 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
 			}
 		}
 	}
-
-	printf("GPU Processing time: %f (ms)\n", GetTimer() );
+	ANN::printf("GPU Processing time: %f (ms)\n", GetTimer() );
 
 	// Write edge matrix back
-	std::cout<<"Copy memory from device to host .."<<std::endl;
+	ANN::printf("Copy memory from device to host..");
 	this->CombineDeviceData(SOMExp);
 	
 	// Clean up after memory allocation
@@ -256,7 +259,7 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
 	SOMExp.clear();
 	
 	// End with an output
-	std::cout<<".. Finished"<<std::endl;
+	ANN::printf(" finished\n");
 }
 
 /*

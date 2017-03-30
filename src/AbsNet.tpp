@@ -38,8 +38,7 @@ void AbsNet<Type>::EraseAll() {
 
 template <class Type>
 void AbsNet<Type>::CreateNet(const ConTable<Type> &Net) {
-	std::cout<<"Create AbsNet()"<<std::endl;
-
+	ANN::printf("Create AbsNet\n");
 	/*
 	 * Initialisiere Variablen
 	 */
@@ -69,7 +68,7 @@ void AbsNet<Type>::CreateNet(const ConTable<Type> &Net) {
 	/*
 	 * Create the layers ..
 	 */
-	std::cout << "Adding " << iNmbLayers << " layers ";
+	ANN::printf("Adding %d layers", iNmbLayers);
 	for(unsigned int i = 0; i < iNmbLayers; i++) {
 		iNmbNeurons = Net.SizeOfLayer.at(i);
 		fType = Net.TypeOfLayer.at(i);
@@ -89,12 +88,12 @@ void AbsNet<Type>::CreateNet(const ConTable<Type> &Net) {
 			SetOPLayer(i);
 		}
 	}
-	std::cout<<".. finished!"<<std::endl;
+	ANN::printf(".. finished\n");
 
 	/*
 	 * Basic information for ~all networks
 	 */
-	std::cout << "Adding " << Net.NeurCons.size() << " edges ";
+	ANN::printf("Adding %d edges", Net.NeurCons.size());
 	for(unsigned int i = 0; i < Net.NeurCons.size(); i++) {
 		/*
 		 * Read settings
@@ -127,7 +126,7 @@ void AbsNet<Type>::CreateNet(const ConTable<Type> &Net) {
 		//Connect neurons with edge
 		ANN::Connect<Type>(pSrcNeur, pDstNeur, fEdgeValue, 0.f, true);
 	}
-	std::cout<<".. finished!"<<std::endl;
+	ANN::printf(".. finished\n");
 }
 
 template <class Type>
@@ -163,12 +162,12 @@ std::vector<Type> AbsNet<Type>::TrainFromData(const unsigned int &iCycles, const
 		fProgress = (Type)(j+1)/(Type)iCycles*100.f;
 		if(iCycles >= 10) {
 			if(((j+1) / (iCycles/10)) == iProgCount && (j+1) % (iCycles/10) == 0) {
-				std::cout << "Training progress: " << iProgCount*10.f << "%" << std::endl;
+				ANN::printf("Training progress: %f%%\n", iProgCount*10.f);
 				iProgCount++;
 			}
 		}
 		else {
-			std::cout << "Training progress: " << fProgress << "%" << std::endl;
+			ANN::printf("Training progress: %f%%\n", fProgress);
 		}
 
 		/*
@@ -383,10 +382,10 @@ void AbsNet<Type>::ExpToFS(std::string path) {
 	bz2out = BZ2_bzWriteOpen(&iBZ2Error, fout, 9, 0, 0);
 
 	if (iBZ2Error != BZ_OK) {
-		std::cout<<"return: "<<"SaveNetwork()"<<std::endl;
+		ANN::printf("error in ExpToFS(): %d\n", iBZ2Error);
 		return;
 	}
-	std::cout<<"Save network.."<<std::endl;
+	ANN::printf("Save network..\n");
 	BZ2_bzWrite( &iBZ2Error, bz2out, &fNetType, sizeof(int) );
 	BZ2_bzWrite( &iBZ2Error, bz2out, &iNmbOfLayers, sizeof(int) );
 
@@ -417,11 +416,11 @@ void AbsNet<Type>::ImpFromFS(std::string path) {
 	bz2in = BZ2_bzReadOpen(&iBZ2Error, fin, 0, 0, NULL, 0);
 
 	if (iBZ2Error != BZ_OK) {
-		std::cout<<"return: "<<"LoadNetwork()"<<std::endl;
+		ANN::printf("error in ImpFromFS(): %d\n", iBZ2Error);
 		return;
 	}
 
-	std::cout<<"Load network.."<<std::endl;
+	ANN::printf("Load network..\n");
 	BZ2_bzRead( &iBZ2Error, bz2in, &fNetType, sizeof(int) );
 	Table.NetType 		= fNetType;
 	BZ2_bzRead( &iBZ2Error, bz2in, &iNmbOfLayers, sizeof(int) );

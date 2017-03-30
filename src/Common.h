@@ -18,9 +18,20 @@
 
 #include <iostream>
 #include <vector>
+#include <stdio.h>
+#include <stdarg.h>
 
 
 namespace ANN {
+inline void printf(const char * format, ...) {
+#ifdef VERBOSE
+	va_list arglist;
+	va_start( arglist, format );
+	vprintf( format, arglist );
+	va_end( arglist );
+#endif
+}
+	
 template <class T> class AbsLayer;
 template <class T> class AbsNeuron;
 
@@ -61,11 +72,12 @@ template <typename T> void Connect(AbsNeuron<T> *pSrcNeuron, AbsLayer<T> *pDestL
 	for(int j = 0; j < static_cast<int>(iSize); j++) {
 		if(iSize >= 10) {
 			if(((j+1) / (iSize/10)) == iProgCount && (j+1) % (iSize/10) == 0) {
-				std::cout<<"Building connections.. Progress: "<<iProgCount*10.f<<"%/Step="<<j+1<<std::endl;
+				ANN::printf("Building connections.. Progress: %f%%/Step:%d\n", iProgCount*10.f, j+1);
 				iProgCount++;
 			}
-		} else {
-			std::cout<<"Building connections.. Progress: "<<(T)(j+1)/(T)iSize*100.f<<"%/Step="<<j+1<<std::endl;
+		} 
+		else {
+			ANN::printf("Building connections.. Progress: %f%%/Step:%d\n", (T)(j+1)/(T)iSize*100.f, j+1);
 		}
 		ANN::Connect(pSrcNeuron, pDestLayer->GetNeuron(j), vValues[j], vMomentums[j], bAdaptState);
 	}
@@ -78,11 +90,12 @@ template <typename T> void Connect(AbsNeuron<T> *pSrcNeuron, AbsLayer<T> *pDestL
 	for(int j = 0; j < static_cast<int>(iSize); j++) {
 		if(iSize >= 10) {
 			if(((j+1) / (iSize/10)) == iProgCount && (j+1) % (iSize/10) == 0) {
-				std::cout<<"Building connections.. Progress: "<<iProgCount*10.f<<"%/Step="<<j+1<<std::endl;
+				ANN::printf("Building connections.. Progress: %f%%/Step:%d\n", iProgCount*10.f, j+1);
 				iProgCount++;
 			}
-		} else {
-			std::cout<<"Building connections.. Progress: "<<(T)(j+1)/(T)iSize*100.f<<"%/Step="<<j+1<<std::endl;
+		} 
+		else {
+			ANN::printf("Building connections.. Progress: %f%%/Step:%d\n", (T)(j+1)/(T)iSize*100.f, j+1);
 		}
 		ANN::Connect(pSrcNeuron, pDestLayer->GetNeuron(j), bAdaptState);
 	}

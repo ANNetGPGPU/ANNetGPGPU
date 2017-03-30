@@ -40,8 +40,7 @@ BPLayer<Type, Functor> *BPNet<Type, Functor>::AddLayer(const unsigned int &iSize
 
 template <class Type, class Functor>
 void BPNet<Type, Functor>::CreateNet(const ConTable<Type> &Net) {
-	std::cout<<"Create BPNet"<<std::endl;
-
+	ANN::printf("Create BPNet\n");
 	/*
 	 * Init
 	 */

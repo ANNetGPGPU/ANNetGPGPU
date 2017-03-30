@@ -111,8 +111,8 @@ AbsLayer<Type> *SOMNet<Type, Functor>::AddLayer(const unsigned int &iSize, const
 
 template<class Type, class Functor>
 void SOMNet<Type, Functor>::CreateNet(const ConTable<Type> &Net) {
-	std::cout<<"Create SOMNet"<<std::endl;
-
+	ANN::printf("Create SOMNet\n");
+	
 	/*
 	 * For all nets necessary: Create Connections (Edges)
 	 */
@@ -189,17 +189,17 @@ void SOMNet<Type, Functor>::CreateSOM(const std::vector<unsigned int> &vDimI, co
 		AbsNet<Type>::EraseAll();
 	}
 
-	std::cout<< "Create input layer" <<std::endl;
+	ANN::printf("Create input layer\n");
 	this->m_pIPLayer = new SOMLayer<Type>(vDimI, ANLayerInput);
 	this->m_pIPLayer->SetID(0);
 	AbsNet<Type>::AddLayer(this->m_pIPLayer);
 
-	std::cout<< "Create output layer" <<std::endl;
+	ANN::printf("Create output layer\n");
 	this->m_pOPLayer = new SOMLayer<Type>(vDimO, ANLayerOutput);
 	this->m_pOPLayer->SetID(1);
 	AbsNet<Type>::AddLayer(this->m_pOPLayer);
 
-	std::cout<< "Connect layer .." <<std::endl;
+	ANN::printf("Connect layers ..\n");
 	((SOMLayer<Type>*)this->m_pIPLayer)->ConnectLayer(this->m_pOPLayer);
 
 	// find sigma0
@@ -213,17 +213,17 @@ void SOMNet<Type, Functor>::CreateSOM(const std::vector<unsigned int> &vDimI, co
 		AbsNet<Type>::EraseAll();
 	}
 
-	std::cout<< "Create input layer" <<std::endl;
+	ANN::printf("Create input layer\n");
 	this->m_pIPLayer = new SOMLayer<Type>(vDimI, ANLayerInput);
 	this->m_pIPLayer->SetID(0);
 	AbsNet<Type>::AddLayer(this->m_pIPLayer);
 
-	std::cout<< "Create output layer" <<std::endl;
+	ANN::printf("Create output layer\n");
 	this->m_pOPLayer = new SOMLayer<Type>(vDimO, ANLayerOutput);
 	this->m_pOPLayer->SetID(1);
 	AbsNet<Type>::AddLayer(this->m_pOPLayer);
 
-	std::cout<< "Connect layer .." <<std::endl;
+	ANN::printf("Connect layers ..\n");
 	((SOMLayer<Type>*)this->m_pIPLayer)->ConnectLayer(this->m_pOPLayer, f2dEdgeMat);
 
 	this->m_pOPLayer->ImpPositions(f2dNeurPos);
@@ -245,17 +245,17 @@ void SOMNet<Type, Functor>::CreateSOM(	const unsigned int &iWidthI, const unsign
 	m_iWidthO = iWidthO;
 	m_iHeightO = iHeightO;
 
-	std::cout<< "Create input layer" <<std::endl;
+	ANN::printf("Create input layer\n");
 	this->m_pIPLayer = new SOMLayer<Type>(iWidthI, iHeightI, ANLayerInput);
 	this->m_pIPLayer->SetID(0);
 	AbsNet<Type>::AddLayer(this->m_pIPLayer);
 
-	std::cout<< "Create output layer" <<std::endl;
+	ANN::printf("Create output layer\n");
 	this->m_pOPLayer = new SOMLayer<Type>(iWidthO, iHeightO, ANLayerOutput);
 	this->m_pOPLayer->SetID(1);
 	AbsNet<Type>::AddLayer(this->m_pOPLayer);
 
-	std::cout<< "Connect layer .." <<std::endl;
+	ANN::printf("Connect layers ..\n");
 	((SOMLayer<Type>*)this->m_pIPLayer)->ConnectLayer(this->m_pOPLayer);
 
 	// find sigma0
@@ -280,7 +280,7 @@ void SOMNet<Type, Functor>::Training(const unsigned int &iCycles, const Training
 	assert(iCycles > 0);
 	
 	if(this->GetTrainingSet() == NULL) {
-		std::cout<<"No training set available!"<<std::endl;
+		ANN::printf("No training set available\n");
 		return;
 	}
 	
@@ -289,15 +289,15 @@ void SOMNet<Type, Functor>::Training(const unsigned int &iCycles, const Training
 	int iMax = this->GetTrainingSet()->GetNrElements()-1;
 	unsigned int iProgCount = 1;
 
-	std::cout<< "Process the SOM now" <<std::endl;
+	ANN::printf("Start calculation now\n");
 	for(m_iCycle = 0; m_iCycle < static_cast<unsigned int>(m_iCycles); m_iCycle++) {
 		if(m_iCycles >= 10) {
 			if(((m_iCycle+1) / (m_iCycles/10)) == iProgCount && (m_iCycle+1) % (m_iCycles/10) == 0) {
-				std::cout<<"Current training progress calculated by the CPU is: "<<iProgCount*10.f<<"%/Step="<<m_iCycle+1<<std::endl;
+				ANN::printf("Current training progress calculated by the CPU is %f%%/Step: %d/%d\n", iProgCount*10.f, m_iCycle+1, m_iCycles);
 				iProgCount++;
 			}
 		} else {
-			std::cout<<"Current training progress calculated by the CPU is: "<<(Type)(m_iCycle+1.f)/(Type)m_iCycles*100.f<<"%/Step="<<m_iCycle+1<<std::endl;
+			ANN::printf("Current training progress calculated by the CPU is %f%%/Step: %d/%d\n", (Type)(m_iCycle+1.f)/(Type)m_iCycles*100.f, m_iCycle+1, m_iCycles);
 		}
 
 		// The input vectors are presented to the network at random

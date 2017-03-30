@@ -119,8 +119,9 @@ void SOMLayer<Type>::ConnectLayer(AbsLayer<Type> *pDestLayer, const bool &bAllow
 	 * Vernetze jedes Neuron dieser Schicht mit jedem Neuron in "pDestLayer"
 	 */
 	for(int i = 0; i < static_cast<int>(this->m_lNeurons.size() ); i++) {
-		std::cout<<"Connect input neuron " << i << " to output layer. Progress: "<<i+1<<"/"<<this->m_lNeurons.size()<<std::endl;
+		ANN::printf("Connect input neuron %d to output layer.. %d/%d\n", i, i+1, this->m_lNeurons.size());
 		pSrcNeuron = this->m_lNeurons[i];
+		
 		if(pSrcNeuron != NULL) {
 			Connect(pSrcNeuron, pDestLayer, bAllowAdapt);
 		}
@@ -138,7 +139,7 @@ void SOMLayer<Type>::ConnectLayer(AbsLayer<Type> *pDestLayer, const F2DArray<Typ
 	std::vector<float> fVals(f2dEdgeMat.GetH(), 0);
 
 	for(int i = 0; i < static_cast<int>(this->m_lNeurons.size() ); i++) {
-		std::cout<<"Connect input neuron " << i << " to output layer. Progress: "<<i+1<<"/"<<this->m_lNeurons.size()<<std::endl;
+		ANN::printf("Connect input neuron %d to output layer.. %d/%d\n", i, i+1, this->m_lNeurons.size());
 		pSrcNeuron = this->m_lNeurons[i];
 
 		fVals = f2dEdgeMat.GetSubArrayX(i);
