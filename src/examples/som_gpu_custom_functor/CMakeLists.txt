@@ -16,8 +16,8 @@ SET( ANCUDASourceFilesEX
 )
 
 # here we pass the extension headers to the build system
-add_definitions(-D__Functions_ADDONS="${SOM_GPU_ADDON_SOURCE_DIR}/NewFunctions.h")
-add_definitions(-D__SOMNetGPU_INSTANCES="${SOM_GPU_ADDON_SOURCE_DIR}/NewInstances.h")
+add_definitions(-D__Functions_ADDONS=<${SOM_GPU_ADDON_SOURCE_DIR}/NewFunctions.h>)
+add_definitions(-D__SOMNetGPU_INSTANCES=<${SOM_GPU_ADDON_SOURCE_DIR}/NewInstances.h>)
 # and rebuild the library with the extensions
 CUDA_ADD_LIBRARY (ANNetEX STATIC ${ANSourceFilesEX} ${ANCUDASourceFilesEX} ${BZIP_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES (ANNetEX ${BZIP2_LIBRARIES}) 

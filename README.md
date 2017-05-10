@@ -1,3 +1,18 @@
+# Updates - 05/10/2017: Added a new example
+
+The program "image_generator" is located in the "/src/examples" subdirectory and was submitted by Ben Bogart. It produces abstract looking images from ordinary input images. 
+To compile it, make sure to install OpenCV. If you want to give it a try, it takes two command line arguments and can be used like this:
+
+```
+./image_generator <input> <output>
+```
+
+Here is an example input image with the related output image.
+![artw_i](https://cloud.githubusercontent.com/assets/4668178/25889737/32f24db8-356b-11e7-96d7-ae1915225c76.png)
+__CUDA image generator example.__ The picture illustrates a some houses in vienna.
+![artw_i](https://cloud.githubusercontent.com/assets/4668178/25889736/32dfa848-356b-11e7-93cd-90ff58a3eba9.png)
+__CUDA image generator example.__ This image was calculated on a GTX 1080. It took apprx. 20 min and 500 MB VRAM.
+
 # Updates - 09/03/2016
 
 - Improvements of the implementation of the base classes

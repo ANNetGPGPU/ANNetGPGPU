@@ -222,7 +222,7 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
 		if(this->m_iCycles >= 10) {
 			if(((this->m_iCycle+1) / (this->m_iCycles/10)) == iProgCount && (this->m_iCycle+1) % (this->m_iCycles/10) == 0) {
 				ANN::printf("Current training progress calculated by the GPU: %f%%/Step: %d/%d\n", 
-							this->m_iCycle+1, 
+							iProgCount*10.f, 
 							this->m_iCycle+1, 
 							this->m_iCycles);
 				iProgCount++;
