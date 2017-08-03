@@ -10,7 +10,11 @@
 #include <ANContainers>
 #include <ANMath>
 
+#include <chrono>
+
 using namespace std;
+using namespace std::chrono;
+
 #include "opencv2/highgui.hpp"
 #include "opencv2/core.hpp"
 #include "opencv2/imgproc.hpp"
@@ -98,9 +102,13 @@ int main(int argc, char* argv[]) {
     network.SetLearningRate(1.0f);
     network.SetSigma0(myImage.cols/2);
 
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
     // Train the network on image
-    network.Training(500000, ANN::ANRandomMode); // samples are randomly ordered.
-
+    network.Training(5000, ANN::ANRandomMode); // samples are randomly ordered.
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>( t2 - t1 ).count();
+    std::cout << "time passed: " << duration << std::endl;
+    
     // Convert SOM weights to Mat
     Mat outputImage = cv::Mat(myImage.rows, myImage.cols, myImage.type(), cv::Scalar::all(0)); // Create output image
     getWeights(&network, outputImage);

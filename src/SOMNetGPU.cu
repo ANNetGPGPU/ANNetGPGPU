@@ -33,15 +33,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Data configuration
 ////////////////////////////////////////////////////////////////////////////////
-const int MAX_GPU_COUNT = 32;
+const int32_t MAX_GPU_COUNT = 32;
 
 
 namespace ANNGPGPU {
 
-
 // new reference implementation
 template<class Type>
-inline ANNGPGPU::BMUExport<Type> hostGetMin(std::vector<ANNGPGPU::BMUExport<Type>> &vec) {
+inline ANN::Centroid<Type> hostGetMin(std::vector<ANN::Centroid<Type>> &vec) {
 	assert(vec.size() > 0);
 	if(vec.size() > 1) {
 		std::sort(vec.begin(), vec.end() );
@@ -50,16 +49,16 @@ inline ANNGPGPU::BMUExport<Type> hostGetMin(std::vector<ANNGPGPU::BMUExport<Type
 }
 
 template<class Type>
-inline std::pair<Type, unsigned int> devGetMin(const thrust::device_vector<Type> &vec) {
+inline std::pair<Type, int32_t> devGetMin(const thrust::device_vector<Type> &vec) {
 	const_iterator<Type> d_min = thrust::min_element(vec.begin(), vec.end() );
-	unsigned int iID = thrust::distance(vec.begin(), d_min);
-	return std::pair<Type, unsigned int>(*d_min, iID);
+	int32_t iID = thrust::distance(vec.begin(), d_min);
+	return std::pair<Type, int32_t>(*d_min, iID);
 }
 
 template<class Type, class Functor>
-int SOMNetGPU<Type, Functor>::GetCudaDeviceCount() const {
-	int iGPU_N 	= 0; 	// device number
-	int iSM20_N 	= 0; 	// number of devices with SM >= 2.0 
+int32_t SOMNetGPU<Type, Functor>::GetCudaDeviceCount() const {
+	int32_t iGPU_N = 0; 	// device number
+	int32_t iSM20_N = 0; 	// number of devices with SM >= 2.0 
 
 	ANN::printf("Check for CUDA-capable devices: ");
 	checkCudaErrors(cudaGetDeviceCount(&iGPU_N) );
@@ -67,7 +66,7 @@ int SOMNetGPU<Type, Functor>::GetCudaDeviceCount() const {
 	    iGPU_N = MAX_GPU_COUNT;
 	}
 	// Check hardware level
-	for(int i = 0; i < iGPU_N; i++) {
+	for(int32_t i = 0; i < iGPU_N; i++) {
 		cudaDeviceProp props;
 		checkCudaErrors(cudaGetDeviceProperties(&props, i) );
 		if(props.major >= 2) {
@@ -77,7 +76,7 @@ int SOMNetGPU<Type, Functor>::GetCudaDeviceCount() const {
 	iGPU_N = iSM20_N;
 	
 	if(!iGPU_N) {
-		ANN::printf("FAIL\nProgram will be terminated because no compatible hardware found\n");
+		ANN::printf("FAIL\nProgram will be terminated because no compatible hardware was detected\n");
 		exit(-1); // No GPU found
 	}
 
@@ -86,33 +85,30 @@ int SOMNetGPU<Type, Functor>::GetCudaDeviceCount() const {
 }
 
 template<class Type, class Functor>
-std::vector<SOMExport<Type>*> SOMNetGPU<Type, Functor>::SplitDeviceData() const {
-	unsigned int iStart = 0;
-	unsigned int iStop = 0;
+std::vector<SOMExport<Type>> SOMNetGPU<Type, Functor>::SplitDeviceData() const {
+	int32_t iStart = 0;
+	int32_t iStop = 0;
 	ANN::SOMLayer<Type> *pLayer = (ANN::SOMLayer<Type> *)(this->GetOPLayer());
-	unsigned int iSizeOfLayer = pLayer->GetNeurons().size();
-	unsigned int iDeviceCount = m_iDeviceCount;
+	int32_t iSizeOfLayer = pLayer->GetNeurons().size();
+	int32_t iDeviceCount = m_iDeviceCount;
 
 	// To make things easy ..
 	if(iSizeOfLayer%iDeviceCount != 0) {
 		iDeviceCount = 1;
 	}
 	
-	std::vector<SOMExport<Type>*> vRes(iDeviceCount);
-	for(int i = 0; i < iDeviceCount; i++) { 
+	std::vector<SOMExport<Type>> vRes(iDeviceCount);
+	for(int32_t i = 0; i < iDeviceCount; i++) { 
 		checkCudaErrors(cudaSetDevice(i) );
 	  
 		iStart = i*(iSizeOfLayer/iDeviceCount);
 		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;
 
-		// Copy conscience information
-		thrust::host_vector<Type> hvConscience(iStop-iStart+1);
 		thrust::host_vector<Type> hvSigma0(iStop-iStart+1);
 		thrust::host_vector<Type> hvLearningRates(iStop-iStart+1);
 		
-		for(unsigned int j = 0; j <= iStop-iStart; j++) {
-			hvConscience[j] = ((ANN::SOMNeuron<Type>*)pLayer->GetNeuron(j+iStart))->GetConscience();
-			hvSigma0[j]     = ((ANN::SOMNeuron<Type>*)pLayer->GetNeuron(j+iStart))->GetSigma0();
+		for(int32_t j = 0; j <= iStop-iStart; j++) {
+			hvSigma0[j] = ((ANN::SOMNeuron<Type>*)pLayer->GetNeuron(j+iStart))->GetSigma0();
 			hvLearningRates[j] = ((ANN::SOMNeuron<Type>*)pLayer->GetNeuron(j+iStart))->GetLearningRate();
 		}
 		ANN::printf(".. Copy edges from host to device: %d/%d\n", i+1, iDeviceCount);
@@ -125,18 +121,18 @@ std::vector<SOMExport<Type>*> SOMNetGPU<Type, Functor>::SplitDeviceData() const 
 		F2DArray<Type> d2dPositions(h2dPositions.GetW(), h2dPositions.GetH(), h2dPositions.ToDevice() );
 		
 		// Create network export container
-		vRes[i] = new SOMExport<Type>(d2dEdges, d2dPositions, hvConscience, hvSigma0, hvLearningRates);
+		vRes[i] = { d2dEdges, d2dPositions, hvSigma0, hvLearningRates };
 	}
 	return vRes;
 }
 
 template<class Type, class Functor>
-void SOMNetGPU<Type, Functor>::CombineDeviceData(std::vector<SOMExport<Type>*> &SExp) {
-	unsigned int iStart = 0;
-	unsigned int iStop = 0;
+void SOMNetGPU<Type, Functor>::CombineDeviceData(std::vector<SOMExport<Type>> &SExp) {
+	int32_t iStart = 0;
+	int32_t iStop = 0;
 	ANN::SOMLayer<Type> *pLayer = (ANN::SOMLayer<Type> *)(this->GetOPLayer());
-	unsigned int iSizeOfLayer = pLayer->GetNeurons().size();
-	unsigned int iDeviceCount = m_iDeviceCount;
+	int32_t iSizeOfLayer = pLayer->GetNeurons().size();
+	int32_t iDeviceCount = m_iDeviceCount;
         
 	if(!iDeviceCount) {
 		return;
@@ -147,78 +143,56 @@ void SOMNetGPU<Type, Functor>::CombineDeviceData(std::vector<SOMExport<Type>*> &
 		iDeviceCount = 1;
 	}
 
-	for(int i = 0; i < iDeviceCount; i++) {
+	for(int32_t i = 0; i < iDeviceCount; i++) {
 		checkCudaErrors(cudaSetDevice(i) );
 
 		iStart = i*(iSizeOfLayer/iDeviceCount);
 		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;
 
-		// Copy back conscience
-		for(unsigned int j = 0; j <= iStop-iStart; j++) {
-			this->m_pOPLayer->GetNeuron(j+iStart)->SetValue((SExp.at(i)->_dvConscience)[j]);
-		}
-
 		ANN::printf(".. Copy edges from device to host: %d/%d\n", i+1, iDeviceCount);
 		// Copy weights between neurons of the input and output layer
-		pLayer->ImpEdgesIn(SExp.at(i)->_f2dEdges, iStart, iStop);
-		
-		// delete old network export container
-		delete SExp.at(i);
+		pLayer->ImpEdgesIn(SExp.at(i)._f2dEdges, iStart, iStop);
 	}
 	// delete old network export container
 	SExp.clear();
 }
 
 template<class Type, class Functor>
-SOMNetGPU<Type, Functor>::SOMNetGPU() {
-	this->m_pIPLayer = NULL;
-	this->m_pOPLayer = NULL;
-	this->m_pBMNeuron = NULL;
-
-	this->m_iCycle = 0;
-
-	this->m_iWidthI = 0.f;
-	this->m_iHeightI = 0.f;
-	this->m_iWidthO = 0.f;
-	this->m_iHeightO = 0.f;
-
-	// Conscience mechanism
-	this->m_fTypeFlag = ANN::ANNetSOM;
+SOMNetGPU<Type, Functor>::SOMNetGPU() 
+{
 }
 
 template<class Type, class Functor>
 SOMNetGPU<Type, Functor>::~SOMNetGPU() {
-	unsigned int iDeviceCount = m_iDeviceCount;
-        if(iDeviceCount) {
+        if(m_iDeviceCount) {
 		checkCudaErrors(cudaDeviceReset() );
         }
 }
 
 template<class Type, class Functor>
-void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::TrainingMode &eMode) {
+void SOMNetGPU<Type, Functor>::Training(const uint32_t &iCycles, const ANN::TrainingMode &eMode) {
 	assert(iCycles > 0);
 	this->m_iCycles = iCycles;
         
-	unsigned int iDeviceCount = m_iDeviceCount;
-	if(!iDeviceCount) {
+	if(!m_iDeviceCount) {
 		return;
 	}
         
-	if(this->GetTrainingSet() == NULL) {
+	if(this->GetTrainingSet() == nullptr) {
 		std::cout<<"No training set available!"<<std::endl;
 		return;
 	}
 
 	ANN::printf("Copy memory from host to device ..\n");
-	std::vector<SOMExport<Type>*> SOMExp = this->SplitDeviceData();
+	std::vector<SOMExport<Type>> SOMExp = this->SplitDeviceData();
 
 	StartTimer();
 	ANN::printf("Calculate SOM ..\n");
-	int iMin = 0;
-	int iMax = this->GetTrainingSet()->GetNrElements()-1;
-	int iProgCount = 1;
+	int32_t iMin = 0;
+	int32_t iMax = this->GetTrainingSet()->GetNrElements()-1;
+	int32_t iProgCount = 1;
 
-	for(this->m_iCycle = 0; this->m_iCycle < static_cast<int>(this->m_iCycles); this->m_iCycle++) {
+	for(this->m_iCycle = 0; this->m_iCycle < this->m_iCycles; this->m_iCycle++) {
 		if(this->m_iCycles >= 10) {
 			if(((this->m_iCycle+1) / (this->m_iCycles/10)) == iProgCount && (this->m_iCycle+1) % (this->m_iCycles/10) == 0) {
 				ANN::printf("Current training progress calculated by the GPU: %f%%/Step: %d/%d\n", 
@@ -236,12 +210,12 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
 		}
 		
 		if(eMode == ANN::ANRandomMode) {
-			unsigned int iRandID = ANN::GetRandInt(iMin, iMax);
+			int32_t iRandID = ANN::GetRandInt(iMin, iMax);
 			this->hostSOMPropagateBW(SOMExp, iRandID);
 		}
 		// The input vectors are presented to the network in serial order
 		else if(eMode == ANN::ANSerialMode) {
-			for(unsigned int j = 0; j < this->GetTrainingSet()->GetNrElements(); j++) {
+			for(int32_t j = 0; j < this->GetTrainingSet()->GetNrElements(); j++) {
 				this->hostSOMPropagateBW(SOMExp, j);
 			}
 		}
@@ -253,9 +227,6 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
 	this->CombineDeviceData(SOMExp);
 	
 	// Clean up after memory allocation
-	for(int i = 0; i < SOMExp.size(); i++) {
-		SOMExp.at(i)->Clear();
-	}
 	SOMExp.clear();
 	
 	// End with an output
@@ -271,59 +242,88 @@ void SOMNetGPU<Type, Functor>::Training(const unsigned int &iCycles, const ANN::
  * ROW(n+1)	..		..		..
  */
 template<class Type, class Functor>
-BMUExport<Type> SOMNetGPU<Type, Functor>::hostSOMFindBMNeuronID(std::vector<SOMExport<Type>*> &SExp, const thrust::device_vector<Type> &dvInput) {
-	BMUExport<Type> resBMU;
-	std::vector<ANNGPGPU::BMUExport<Type>> vBMUExp(SExp.size() );
+ANN::Centroid<Type> SOMNetGPU<Type, Functor>::hostSOMFindBMNeuronID(std::vector<SOMExport<Type>> &SExp, const thrust::device_vector<Type> &dvInput) {
+	ANN::Centroid<Type> resBMU;
+	std::vector<ANN::Centroid<Type>> vBMUExp(SExp.size() );
 
 	assert(SExp.size() > 0);
 	assert(vBMUExp.size() == SExp.size() );
 
 	omp_set_num_threads(SExp.size() );  	// create as many CPU threads as there are CUDA devices
-	#pragma omp parallel 			// for(int iDevID = 0; iDevID < static_cast<int>(SExp.size() ); iDevID++) {
+	#pragma omp parallel 			// for(int32_t iDevID = 0; iDevID < static_cast<int32_t>(SExp.size() ); iDevID++) {
 	{
-		unsigned int iDevID 	= omp_get_thread_num();
+		const int32_t iDevID = omp_get_thread_num();
 		checkCudaErrors(cudaSetDevice(iDevID) );
 		
-		unsigned int iWidth 	= SExp.at(iDevID)->_f2dEdges.GetW();
-		unsigned int iHeight 	= SExp.at(iDevID)->_f2dEdges.GetH();
-
-		assert(iWidth 	> 0);
-		assert(iHeight 	> 0);
+		const int32_t iWidth = SExp.at(iDevID)._f2dEdges.GetW();
+		const int32_t iHeight = SExp.at(iDevID)._f2dEdges.GetH();
 
 		thrust::device_vector<Type> dvRes(iWidth, 0.f);
-
-		for(int y = 0; y < static_cast<int>(iHeight); y++) {               
-			thrust::transform(SExp.at(iDevID)->_f2dEdges.GetRowBegin(y),
-				SExp.at(iDevID)->_f2dEdges.GetRowEnd(y),
+		for(int32_t y = 0; y < iHeight; y++) {               
+			thrust::transform(SExp.at(iDevID)._f2dEdges.GetRowBegin(y),
+				SExp.at(iDevID)._f2dEdges.GetRowEnd(y),
 				dvRes.begin(),
 				dvRes.begin(),
 				spowAmXpY_functor<Type>(dvInput[y]) );
 		}
 
-		if(this->m_fConscienceRate > 0.f) { 								// Implementation of conscience mechanism
-			thrust::transform(dvRes.begin(),					// input
-				dvRes.end(),							// input
-				SExp.at(iDevID)->_dvConscience.begin(),				// input
-				dvRes.begin(),							// result
-				sXmAmY_functor<Type>(1.f/(Type)iWidth) );				// functor
-
-			thrust::transform(dvRes.begin(),					// input
-				dvRes.end(),							// input
-				SExp.at(iDevID)->_dvConscience.begin(),				// input
-				SExp.at(iDevID)->_dvConscience.begin(),				// result
-				sAXmY_functor<Type>(this->m_fConscienceRate) );					// functor
-		}
-
-		std::pair<Type, unsigned int> pCurBMUVal = devGetMin(dvRes);
-		BMUExport<Type> BMU(pCurBMUVal.first, pCurBMUVal.second, iDevID);
+		std::pair<Type, int32_t> pCurBMUVal = devGetMin(dvRes);
+		ANN::Centroid<Type> BMU(pCurBMUVal.first, pCurBMUVal.second, iDevID);
 		vBMUExp[iDevID] = BMU;
 	}
 
 	resBMU = hostGetMin(vBMUExp);
-	checkCudaErrors(cudaSetDevice(resBMU.iDeviceID) );
-	resBMU.dvBMUPos = SExp.at(resBMU.iDeviceID)->_f2dPositions.GetSubArrayY(resBMU.iBMUID);
-
+	checkCudaErrors(cudaSetDevice(resBMU._deviceID) );
+	resBMU._position = SExp.at(resBMU._deviceID)._f2dPositions.GetSubArrayY(resBMU._unitID);
+	resBMU._edges = SExp.at(resBMU._deviceID)._f2dEdges.GetSubArrayY(resBMU._unitID);
 	return resBMU;
+}
+
+template<class Type, class Functor>
+std::vector<ANN::Centroid<Type>> SOMNetGPU<Type, Functor>::FindAllCentroids() {     
+	std::vector<ANN::Centroid<Type>> vCentroids;
+
+	int32_t iDeviceCount = m_iDeviceCount;
+	if(!iDeviceCount) {
+		return vCentroids;
+	}
+        
+	if(this->GetTrainingSet() == nullptr) {
+		std::cout<<"No training set available!"<<std::endl;
+		return vCentroids;
+	}
+
+	ANN::printf("Copy memory from host to device ..\n");
+	std::vector<SOMExport<Type>> SOMExp = this->SplitDeviceData();
+
+	StartTimer();
+	for(int32_t j = 0; j < this->GetTrainingSet()->GetNrElements(); j++) {
+		assert(j < this->GetTrainingSet()->GetNrElements() );
+
+		// Set Input
+		std::vector<Type> vCurInput = this->GetTrainingSet()->GetInput(j);
+		thrust::device_vector<Type> dvInput(vCurInput.size() );
+		thrust::copy(vCurInput.begin(), vCurInput.end(), dvInput.begin() );
+
+		// Find BMNeuron
+		ANN::Centroid<Type> BMUExp = this->hostSOMFindBMNeuronID(SOMExp, dvInput);
+		BMUExp._input = vCurInput;
+		vCentroids.push_back(BMUExp);
+	}
+		
+	ANN::printf("GPU Processing time: %f (ms)\n", GetTimer() );
+
+	// Write edge matrix back
+	ANN::printf("Copy memory from device to host..");
+	this->CombineDeviceData(SOMExp);
+	
+	// Clean up after memory allocation
+	SOMExp.clear();
+	
+	// End with an output
+	ANN::printf(" finished\n");
+
+	return vCentroids;
 }
 
 /*
@@ -335,7 +335,7 @@ BMUExport<Type> SOMNetGPU<Type, Functor>::hostSOMFindBMNeuronID(std::vector<SOME
  * ROW(n+1)	..		..		..		..
  */
 template<class Type, class Functor>
-void SOMNetGPU<Type, Functor>::hostSOMPropagateBW( std::vector<SOMExport<Type>*> &SExp, const unsigned int &iPatternID) {
+void SOMNetGPU<Type, Functor>::hostSOMPropagateBW(std::vector<SOMExport<Type>> &SExp, const int32_t &iPatternID) {
 	assert(iPatternID < this->GetTrainingSet()->GetNrElements() );
 
 	// Set Input
@@ -343,46 +343,47 @@ void SOMNetGPU<Type, Functor>::hostSOMPropagateBW( std::vector<SOMExport<Type>*>
 	thrust::device_vector<Type> dvInput(vCurInput.size() );
 	thrust::copy(vCurInput.begin(), vCurInput.end(), dvInput.begin() );
 
-	// Find BMNeuron 
-	BMUExport<Type> BMUExp = this->hostSOMFindBMNeuronID(SExp, dvInput);
+	// Find BMNeuron
+	ANN::Centroid<Type> BMUExp = this->hostSOMFindBMNeuronID(SExp, dvInput);
+	BMUExp._input = vCurInput;
 
-	// Propagate BW SM 2.0
+	// Perform calculation
 	omp_set_num_threads(SExp.size() );  	// create as many CPU threads as there are CUDA devices
-	#pragma omp parallel 			// for(int iDev = 0; iDev < static_cast<int>(SExp.size() ); iDev++) {
+	#pragma omp parallel 			// for(int32_t iDev = 0; iDev < static_cast<int32_t>(SExp.size() ); iDev++) {
 	{
-		unsigned int iDevID 	= omp_get_thread_num();
+		int32_t iDevID = omp_get_thread_num();
 		checkCudaErrors(cudaSetDevice(iDevID) );
 		
-		unsigned int iWidth 	= SExp.at(iDevID)->_f2dPositions.GetW();
-		unsigned int iHeight 	= SExp.at(iDevID)->_f2dPositions.GetH();
+		int32_t iWidth = SExp.at(iDevID)._f2dPositions.GetW();
+		int32_t iHeight = SExp.at(iDevID)._f2dPositions.GetH();
 
-		thrust::device_vector<Type> dvTmp 		(iWidth, 0.f); 			// temporary
-		thrust::device_vector<Type> dvLearningRate	(iWidth, 0.f);
-		thrust::device_vector<Type> dvInfl		(iWidth, 0.f);
-		thrust::device_vector<Type> dvDist		(iWidth, 0.f);
+		thrust::device_vector<Type> dvTmp(iWidth, 0.f); 			// temporary
+		thrust::device_vector<Type> dvLearningRate(iWidth, 0.f);
+		thrust::device_vector<Type> dvInfl(iWidth, 0.f);
+		thrust::device_vector<Type> dvDist(iWidth, 0.f);
 
 		// 1a. Calc distances for all neurons to BMNeuron: Distance = sqrt(pow(x,2)+pow(y,2)+pow(z,2)+pow(n+1,2) )
-		for(int y = 0; y < static_cast<int>(iHeight); y++) { 				// for each coordinate position of the neuron
+		for(int32_t y = 0; y < iHeight; y++) { 				// for each coordinate position of the neuron
 			thrust::transform(
-				SExp.at(iDevID)->_f2dPositions.GetRowBegin(y),
-				SExp.at(iDevID)->_f2dPositions.GetRowEnd(y),
+				SExp.at(iDevID)._f2dPositions.GetRowBegin(y),
+				SExp.at(iDevID)._f2dPositions.GetRowEnd(y),
 				dvDist.begin(),
 				dvDist.begin(),
-				spowAmXpY_functor<Type>(BMUExp.dvBMUPos[y]) );
+				spowAmXpY_functor<Type>(BMUExp._position[y]) );
 		}
 		
 		// 1b. Calc the square root
 		thrust::transform(dvDist.begin(), dvDist.end(), dvDist.begin(), square_root<Type>());
 
 		// 2. calc learning rate
-		thrust::device_vector<Type> *dvLRate = &(SExp.at(iDevID)->_dvLearningRate);
+		thrust::device_vector<Type> *dvLRate = &(SExp.at(iDevID)._dvLearningRate);
 		thrust::transform( dvLRate->begin(),						// input
 			dvLRate->end(), 							// input
 			dvLearningRate.begin(), 						// result
 			lrate_decay_functor<Type, Functor>(this->m_iCycle, this->m_iCycles) );	// functor
 
 		// 3. Calc SigmaT^2 (already squared)
-		thrust::device_vector<Type> *dvSigma0 = &SExp.at(iDevID)->_dvSigma0;
+		thrust::device_vector<Type> *dvSigma0 = &SExp.at(iDevID)._dvSigma0;
 		thrust::transform( dvSigma0->begin(),						// input
 			dvSigma0->end(), 							// input
 			dvTmp.begin(), 								// result
@@ -411,16 +412,16 @@ void SOMNetGPU<Type, Functor>::hostSOMPropagateBW( std::vector<SOMExport<Type>*>
 			thrust::less<Type>() 							// functor
 		);
 		// 5b. Use stencil to modify only neurons inside the radius
-		iWidth 	= SExp.at(iDevID)->_f2dEdges.GetW();
-		iHeight = SExp.at(iDevID)->_f2dEdges.GetH();
-		for(int y = 0; y < static_cast<int>(iHeight); y++) {				// for each edge of the neuron
-			thrust::transform_if( SExp.at(iDevID)->_f2dEdges.GetRowBegin(y),		// input 1
-				SExp.at(iDevID)->_f2dEdges.GetRowEnd(y), 			// input 1
+		iWidth 	= SExp.at(iDevID)._f2dEdges.GetW();
+		iHeight = SExp.at(iDevID)._f2dEdges.GetH();
+		for(int32_t y = 0; y < iHeight; y++) {				// for each edge of the neuron
+			thrust::transform_if( SExp.at(iDevID)._f2dEdges.GetRowBegin(y),		// input 1
+				SExp.at(iDevID)._f2dEdges.GetRowEnd(y), 			// input 1
 				dvInfl.begin(),							// input 2
 				dvTmp.begin(),							// stencil
-				SExp.at(iDevID)->_f2dEdges.GetRowBegin(y), 			// result
+				SExp.at(iDevID)._f2dEdges.GetRowBegin(y), 			// result
 				som_hebbian_functor<Type, Functor>(dvInput[y]), // functor
-				thrust::identity<int>() ); 					// predicate
+				thrust::identity<int32_t>() ); 					// predicate
 		}
 	}
 }

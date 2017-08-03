@@ -31,36 +31,19 @@ template<class T> class AbsNeuron;
  * @class Edge
  * @brief Represents an edge in the network. Always connecting two neurons.
  * Each egde connects two neurons and has a specific value which might gets changed by connected neurons.
- * @author Daniel "dgrat" Frenzel
  */
 template <class Type>
 class Edge {
 private:
-	Type m_fWeight;
-	Type m_fMomentum;
+	Type m_fWeight = GetRandReal(-0.5f, 0.5f);
+	Type m_fMomentum = static_cast<Type>(0);
 
-	AbsNeuron<Type> *m_pNeuronFirst;
-	AbsNeuron<Type> *m_pNeuronSecond;
+	AbsNeuron<Type> *m_pNeuronFirst = nullptr;
+	AbsNeuron<Type> *m_pNeuronSecond = nullptr;
 
-	bool m_bAllowAdaptation;
+	bool m_bAllowAdaptation = true;
 
 public:
-	/**
-	 * @brief Creating a "weight" connecting two neurons.
-	 */
-	Edge();
-
-	/**
-	 * @brief Creating a "weight" with the properties of: *pEdge.
-	 * This constructor can't copy connections (edges), because they normally have dependencies to other neurons.
-	 */
-	Edge(Edge<Type> *pEdge);
-	/**
-	 * @brief Creating a "weight" connecting two neurons.
-	 * @param pFirst Pointer directing to neuron number one.
-	 * @param pSecond Pointer directing to neuron number two.
-	 */
-	Edge(AbsNeuron<Type> *pFirst, AbsNeuron<Type> *pSecond);
 	/**
 	 * @brief Creating a "weight" connecting two neurons.
 	 * @param pFirst Pointer directing to neuron number one.
@@ -69,7 +52,11 @@ public:
 	 * @param fMomentum Value of the current momentum of the edge.
 	 * @param bAdapt Allows to change the weight.
 	 */
-	Edge(AbsNeuron<Type> *pFirst, AbsNeuron<Type> *pSecond, Type fValue, Type fMomentum, bool bAdapt);
+	Edge(AbsNeuron<Type> *pFirst = nullptr, 
+	     AbsNeuron<Type> *pSecond = nullptr, 
+	     Type fValue = static_cast<Type>(0), 
+	     Type fMomentum = static_cast<Type>(0), 
+	     bool bAdapt = true);
 
 	/**
 	 * @brief Looking from neuron pSource. Is returning a pointer to the other neuron.

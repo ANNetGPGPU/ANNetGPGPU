@@ -37,7 +37,10 @@ int main(int argc, char *argv[]) {
 	cpu.SetTrainingSet(input);
 
 	cpu.Training(1000);
-	std::vector<ANN::Centroid<float>> vCen =  cpu.GetCentroidList();
+	std::vector<ANN::Centroid<float>> vCen = cpu.FindAllCentroids();
+	for(size_t i = 0; i < vCen.size(); i++) {
+		std::cout << vCen.at(i)._unitID << ", "  << vCen.at(i)._distance << std::endl;
+	}
 
 	SOMReader w(w1, w1, w2);
 	for(int x = 0; x < w1*w1; x++) {

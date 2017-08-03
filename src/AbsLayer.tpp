@@ -15,11 +15,6 @@
 */
 
 template <class Type>
-AbsLayer<Type>::AbsLayer() {
-
-}
-
-template <class Type>
 AbsLayer<Type>::~AbsLayer() {
 	EraseAll();
 }
@@ -27,6 +22,7 @@ AbsLayer<Type>::~AbsLayer() {
 template <class Type>
 void AbsLayer<Type>::EraseAll() {
 	for(unsigned int i = 0; i < m_lNeurons.size(); i++) {
+		if(m_lNeurons[i] == nullptr) continue; 
 		delete m_lNeurons[i];
 	}
 	m_lNeurons.clear();

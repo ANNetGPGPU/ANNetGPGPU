@@ -575,6 +575,6 @@ void MainWindow::sl_createLayer() {
     m_pShowEdges->setDisabled(false);
     m_pShowNodes->setDisabled(false);
 
-    QPointF pCenter = m_pViewer->getScene()->sceneRect().center();
-    Layer *pLayer = m_pViewer->getScene()->addLayer(1, pCenter, "no type");
+    //QPointF pCenter = m_pViewer->getScene()->sceneRect().center();
+    //Layer *pLayer = m_pViewer->getScene()->addLayer(1, pCenter, "no type");
 }

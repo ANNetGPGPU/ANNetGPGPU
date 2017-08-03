@@ -56,14 +56,13 @@ typedef uint32_t NetTypeFlag;
 template <class Type>
 class AbsNet {	
 protected:
-	NetTypeFlag m_fTypeFlag;
-
-	TrainingSet<Type> *m_pTrainingData;			// list of training data
+	NetTypeFlag m_fTypeFlag = ANNetUndefined;
+	TrainingSet<Type> *m_pTrainingData = nullptr;			// list of training data
 
 	// TODO maybe USE MAP for index administration?!
 	std::vector<AbsLayer<Type>*> m_lLayers;			// list of all layers, layer->GetID() must be identical with indices of this array!
-	AbsLayer<Type> *m_pIPLayer;				// pointer to input layer
-	AbsLayer<Type> *m_pOPLayer;				// pointer to output layer
+	AbsLayer<Type> *m_pIPLayer = nullptr;				// pointer to input layer
+	AbsLayer<Type> *m_pOPLayer = nullptr;				// pointer to output layer
 
 	/**
 	 * @brief Adds a new layer to the network. New layer will get appended to m_lLayers.
@@ -72,7 +71,6 @@ protected:
 	virtual void AddLayer(AbsLayer<Type> *pLayer);
 
 public:
-	AbsNet();
 	virtual ~AbsNet();
 
 	/**

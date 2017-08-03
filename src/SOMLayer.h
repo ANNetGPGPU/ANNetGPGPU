@@ -116,7 +116,7 @@ public:
 	 * @brief Sets learning rate scalar of the network.
 	 * @param fVal New value of the learning rate. Recommended: 0.005f - 1.0f
 	 */
-	void SetLearningRate 	(const float &fVal);
+	void SetLearningRate(const float &fVal);
 
 	/**
 	 * @brief Returns the dimensions of the layer.

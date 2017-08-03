@@ -15,17 +15,8 @@
 */
 
 template <class Type, class Functor>
-BPNeuron<Type, Functor>::BPNeuron() {
-	m_Setup = {0.1f, 0, 0};
-}
-
-template <class Type, class Functor>
 BPNeuron<Type, Functor>::BPNeuron(AbsLayer<Type> *parentLayer) : AbsNeuron<Type>(parentLayer) {
 	m_Setup = {0.1f, 0, 0};
-}
-
-template <class Type, class Functor>
-BPNeuron<Type, Functor>::BPNeuron(BPNeuron *pNeuron) : AbsNeuron<Type>(pNeuron) {
 }
 
 template <class Type, class Functor>

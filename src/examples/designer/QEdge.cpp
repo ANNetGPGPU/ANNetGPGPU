@@ -85,11 +85,12 @@ void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     double angle = ::acos(line.dx() / line.length());
     if (line.dy() >= 0)
         angle = TwoPi - angle;
-
+/*
     QPointF sourceArrowP1 = m_SourcePoint + QPointF(sin(angle + Pi / 3) * m_ArrowSize,
                                                   cos(angle + Pi / 3) * m_ArrowSize);
     QPointF sourceArrowP2 = m_SourcePoint + QPointF(sin(angle + Pi - Pi / 3) * m_ArrowSize,
                                                   cos(angle + Pi - Pi / 3) * m_ArrowSize);
+*/
     QPointF destArrowP1 = m_DestPoint + QPointF(sin(angle - Pi / 3) * m_ArrowSize,
                                               cos(angle - Pi / 3) * m_ArrowSize);
     QPointF destArrowP2 = m_DestPoint + QPointF(sin(angle - Pi + Pi / 3) * m_ArrowSize,

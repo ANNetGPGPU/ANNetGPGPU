@@ -49,13 +49,13 @@ int main(int argc, char *argv[]) {
 	
 	std::vector<float> errors;
 	
-	ANN::HebbianConf<float> conf = {0.5, 0, 0};
+	ANN::HebbianConf<float> conf = {0.25, 0, 0};
 	cpu_one.Setup(conf);
 	cpu_one.SetTrainingSet(input);
 
 	bool b = false;
 	float f;
-	errors = cpu_one.TrainFromData(50, 0, b, f);
+	errors = cpu_one.TrainFromData(500, 0, b, f);
 	std::cout<< &cpu_one <<std::endl;
 
 	cpu_one.ExpToFS("foo.bar");

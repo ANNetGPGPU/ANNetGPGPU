@@ -19,6 +19,8 @@
 #ifndef SWIG
 #include <iostream>
 #include <vector>
+
+#include <thrust/host_vector.h>
 #endif
 
 namespace ANN {
@@ -28,35 +30,58 @@ namespace ANN {
  */
 template <class Type>
 struct Centroid {
-	std::vector<Type> m_vInput;
-	std::vector<Type> m_vCentroid;
+// VARIABLES
+	Type _distance = static_cast<Type>(0);
+	int32_t _unitID = -1;
+	int32_t _deviceID = -1;
+	thrust::host_vector<Type> _position;
+	thrust::host_vector<Type> _edges;
+	std::vector<Type> _input;
 	
-	unsigned int m_iBMUID;
-	Type m_fEucDist;
-
+//FUNCTIONS
+	Centroid() = default;
+	Centroid(int32_t iUID, int32_t iDID, const thrust::host_vector<Type> &vPos);
+	Centroid(Type fDist, int32_t iUID, int32_t iDID);
+	
 	bool operator<(const Centroid &rhs) const {
-		return m_iBMUID < rhs.m_iBMUID;
+		return _distance < rhs._distance;
 	}
 	bool operator>(const Centroid &rhs) const {
-		return m_iBMUID > rhs.m_iBMUID;
+		return _distance > rhs._distance;
 	}
 	bool operator<=(const Centroid &rhs) const {
-		return m_iBMUID <= rhs.m_iBMUID;
+		return _distance <= rhs._distance;
 	}
 	bool operator>=(const Centroid &rhs) const {
-		return m_iBMUID >= rhs.m_iBMUID;
+		return _distance >= rhs._distance;
 	}
 	bool operator==(const Centroid &rhs) const {
-		return m_iBMUID == rhs.m_iBMUID;
+		return _distance == rhs._distance;
 	}
 	bool operator!=(const Centroid &rhs) const {
-		return m_iBMUID != rhs.m_iBMUID;
+		return _distance != rhs._distance;
 	}
 	
 #ifdef __Centroid_ADDON
 	#include __Centroid_ADDON
 #endif
-}; 
+};
+
+template <class Type>
+Centroid<Type>::Centroid(Type fDist, int32_t iUID, int32_t iDID) {
+	_distance 	= fDist;
+	_unitID 	= iUID;
+	_deviceID 	= iDID;
+	_position 	= thrust::host_vector<Type>(0);
+}
+
+template <class Type>
+Centroid<Type>::Centroid(int32_t iUID, int32_t iDID, const thrust::host_vector<Type> &vPos) {
+	_distance 	= static_cast<Type>(0);
+	_unitID 	= iUID;
+	_deviceID 	= iDID;
+	_position 	= vPos;
+}
 
 }
 

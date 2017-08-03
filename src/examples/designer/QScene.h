@@ -55,7 +55,7 @@ public:
     void removeNode(Node*);
     QList<Node*> nodes();
 
-    Layer* addLayer(const unsigned int &iNodes, const QPointF &fPos = QPointF(0, 0), const QString &sName = "");
+    Layer* addLayer(const uint32_t &iNodes, const QPointF &fPos = QPointF(0, 0), const QString &sName = "");
     void removeLayer(Layer*);
     QList<Layer*> layers();
 

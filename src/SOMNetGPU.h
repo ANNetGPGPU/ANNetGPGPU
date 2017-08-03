@@ -20,7 +20,10 @@
 #include "SOMExport.h"
 #include "SOMNet.h"
 
+#include "containers/Centroid.h"
+
 #include <cfloat>
+#include <map>
 #include <cmath>
 #include <algorithm>
 #include <omp.h>
@@ -33,18 +36,17 @@ namespace ANNGPGPU {
 template <class Type, class Functor>
 class SOMNetGPU : public ANN::SOMNet<Type, Functor> {
 private:
-	int m_iDeviceCount = GetCudaDeviceCount();
-	
-	std::vector<SOMExport<Type>*> SplitDeviceData() const;
-	void CombineDeviceData(std::vector<SOMExport<Type>*> &SExp);
+	int32_t m_iDeviceCount = GetCudaDeviceCount();
+	std::vector<SOMExport<Type>> SplitDeviceData() const;
+	void CombineDeviceData(std::vector<SOMExport<Type>> &SExp);
 
 	/**
 	 * Returns the number of cuda capable devices as integer.
 	 * @return Number of cuda capable devices
 	 */
-	int GetCudaDeviceCount() const;
-	BMUExport<Type> hostSOMFindBMNeuronID(std::vector<SOMExport<Type>*> &SExp, const thrust::device_vector<Type> &dvInput);
-	void hostSOMPropagateBW( std::vector<SOMExport<Type>*> &SExp, const unsigned int &iPatternID);
+	int32_t GetCudaDeviceCount() const;
+	ANN::Centroid<Type> hostSOMFindBMNeuronID(std::vector<SOMExport<Type>> &SExp, const thrust::device_vector<Type> &dvInput);
+	void hostSOMPropagateBW( std::vector<SOMExport<Type>> &SExp, const int32_t &iPatternID);
 
 public:
 	SOMNetGPU();
@@ -57,7 +59,13 @@ public:
 	 * Value: ANRandomMode is faster, because one random input pattern is presented and a new cycle starts.\n
 	 * Value: ANSerialMode means, that all input patterns are presented in order. Then a new cycle starts.
 	 */
-	virtual void Training(const unsigned int &iCycles = 1000, const ANN::TrainingMode &eMode = ANN::ANRandomMode);
+	void Training(const uint32_t &iCycles = 1000, const ANN::TrainingMode &eMode = ANN::ANRandomMode) override;
+	
+	/**
+	 * @brief Clustering results of the network.
+	 * @return std::vector<Centroid> Iterates through the input list and calcs the euclidean distance based on the BMU.
+	 */
+	std::vector<ANN::Centroid<Type>> FindAllCentroids() override;
 	
 #ifdef __SOMNetGPU_ADDON
 	#include __SOMNetGPU_ADDON

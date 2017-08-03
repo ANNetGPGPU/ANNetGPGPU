@@ -54,14 +54,14 @@ ANN::TrainingSet<float> *IOForm::getTrainingSet() {
 
 	m_pTrainingSet = new ANN::TrainingSet<float>;
 
-	unsigned int iInpColSize = m_pNet->GetIPLayer()->GetNeurons().size();
-	unsigned int iOutColSize = m_pNet->GetOPLayer()->GetNeurons().size();
+	size_t iInpColSize = m_pNet->GetIPLayer()->GetNeurons().size();
+	size_t iOutColSize = m_pNet->GetOPLayer()->GetNeurons().size();
 
 	bool bOK;
 
-	for(unsigned int x = 0; x < m_iDataSets; x++) {
+	for(size_t x = 0; x < m_iDataSets; x++) {
 		std::vector<float> vInp;
-		for(unsigned int y = 0; y < iInpColSize; y++) {
+		for(size_t y = 0; y < iInpColSize; y++) {
 			float fVal = m_pITable->item(y, x)->text().toFloat(&bOK);
 			if(bOK)
 				vInp.push_back(fVal);
@@ -69,9 +69,9 @@ ANN::TrainingSet<float> *IOForm::getTrainingSet() {
 		}
 		m_pTrainingSet->AddInput(vInp);
 	}
-	for(unsigned int x = 0; x < m_iDataSets; x++) {
+	for(size_t x = 0; x < m_iDataSets; x++) {
 		std::vector<float> vOut;
-		for(unsigned int y = 0; y < iOutColSize; y++) {
+		for(size_t y = 0; y < iOutColSize; y++) {
 			float fVal = m_pOTable->item(y, x)->text().toFloat(&bOK);
 			if(bOK)
 				vOut.push_back(fVal);
@@ -90,7 +90,7 @@ void IOForm::setTrainingSet(ANN::TrainingSet<float> *pTSet) {
 
 	m_pTrainingSet = pTSet;
 
-	int iHeight;
+	size_t iHeight;
 /*
 	if(pTSet->GetNrElements() > m_iDataSets) {
 		setNmbrOfSets(pTSet->GetNrElements());
@@ -98,14 +98,14 @@ void IOForm::setTrainingSet(ANN::TrainingSet<float> *pTSet) {
 	}
 */
 	// Set the size of the input table
-	for(unsigned int x = 0; x < m_iDataSets; x++) {
+	for(size_t x = 0; x < m_iDataSets; x++) {
 
 		if(x < pTSet->GetNrElements()) {
-			if(pTSet->GetInput(x).size() > m_pITable->rowCount() )
+			if(pTSet->GetInput(x).size() > (size_t)m_pITable->rowCount() )
 				iHeight = m_pITable->rowCount();
 			else iHeight = pTSet->GetInput(x).size();
 
-			for(unsigned int y = 0; y < iHeight; y++) {
+			for(size_t y = 0; y < iHeight; y++) {
 				if(y < pTSet->GetInput(x).size() ) {
 					float fVal = pTSet->GetInput(x)[y];
 					QModelIndex index = m_pITable->model()->index(y, x, QModelIndex());
@@ -116,14 +116,14 @@ void IOForm::setTrainingSet(ANN::TrainingSet<float> *pTSet) {
 	}
 
 	// Set the size of the input table
-	for(unsigned int x = 0; x < m_iDataSets; x++) {
+	for(size_t x = 0; x < m_iDataSets; x++) {
 
 		if(x < pTSet->GetNrElements()) {
-			if(pTSet->GetInput(x).size() > m_pOTable->rowCount() )
+			if(pTSet->GetInput(x).size() > (size_t)m_pOTable->rowCount() )
 				iHeight = m_pOTable->rowCount();
 			else iHeight = pTSet->GetOutput(x).size();
 
-			for(unsigned int y = 0; y < iHeight; y++) {
+			for(size_t y = 0; y < iHeight; y++) {
 				if(y < pTSet->GetOutput(x).size() ) {
 					float fVal = pTSet->GetOutput(x)[y];
 					QModelIndex index = m_pOTable->model()->index(y, x, QModelIndex());
@@ -174,9 +174,9 @@ void IOForm::sl_createTables(ANN::BPNet<float, ANN::fcn_log<float>> *pNet) {
     disconnect(m_pITable, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(sl_send()));
     disconnect(m_pOTable, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(sl_send()));
 
-	m_pNet 					= pNet;
+	m_pNet = pNet;
 	QTableWidgetItem *pItem = NULL;
-	unsigned int iColSize 	= 0;
+	size_t iColSize 	= 0;
 
 	QFont font;
 	font.setBold(true);
@@ -185,12 +185,12 @@ void IOForm::sl_createTables(ANN::BPNet<float, ANN::fcn_log<float>> *pNet) {
 	iColSize = pNet->GetIPLayer()->GetNeurons().size();
 	m_pITable->setColumnCount(m_iDataSets);
 	m_pITable->setRowCount(iColSize);
-	for(unsigned int x = 0; x < m_iDataSets; x++) {
+	for(size_t x = 0; x < m_iDataSets; x++) {
 		pItem = new QTableWidgetItem("Input\npair "+QString::number(x+1));
 		pItem->setFont(font);
 		m_pITable->setHorizontalHeaderItem(x, pItem);
 
-		for(unsigned int y = 0; y < iColSize; y++) {
+		for(size_t y = 0; y < iColSize; y++) {
 			pItem = new QTableWidgetItem("Neuron "+QString::number(y+1));
 			pItem->setFont(font);
 			m_pITable->setVerticalHeaderItem(y, pItem);
@@ -211,11 +211,11 @@ void IOForm::sl_createTables(ANN::BPNet<float, ANN::fcn_log<float>> *pNet) {
 	iColSize = pNet->GetOPLayer()->GetNeurons().size();
 	m_pOTable->setColumnCount(m_iDataSets);
 	m_pOTable->setRowCount(iColSize);
-	for(unsigned int x = 0; x < m_iDataSets; x++) {
+	for(size_t x = 0; x < m_iDataSets; x++) {
 		pItem = new QTableWidgetItem("Output\npair "+QString::number(x+1));
 		pItem->setFont(font);
 		m_pOTable->setHorizontalHeaderItem(x, pItem);
-		for(unsigned int y = 0; y < iColSize; y++) {
+		for(size_t y = 0; y < iColSize; y++) {
 			pItem = new QTableWidgetItem("Neuron "+QString::number(y+1));
 			pItem->setFont(font);
 			m_pOTable->setVerticalHeaderItem(y, pItem);

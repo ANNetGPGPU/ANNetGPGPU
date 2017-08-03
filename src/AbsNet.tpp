@@ -14,14 +14,6 @@
    Author: Daniel Frenzel (dgdanielf@gmail.com)
 */
 
-template <class Type>
-AbsNet<Type>::AbsNet() //: Importer(this),  Exporter(this)
-{	
-	m_pTrainingData = NULL;
-	m_pIPLayer 	= NULL;
-	m_pOPLayer 	= NULL;
-	m_fTypeFlag 	= ANNetUndefined;
-}
 
 template <class Type>
 AbsNet<Type>::~AbsNet() {
@@ -52,10 +44,10 @@ void AbsNet<Type>::CreateNet(const ConTable<Type> &Net) {
 
 	Type fEdgeValue = 0.f;
 
-	AbsLayer<Type> *pDstLayer = NULL;
-	AbsLayer<Type> *pSrcLayer = NULL;
-	AbsNeuron<Type> *pDstNeur = NULL;
-	AbsNeuron<Type> *pSrcNeur = NULL;
+	AbsLayer<Type> *pDstLayer = nullptr;
+	AbsLayer<Type> *pSrcLayer = nullptr;
+	AbsNeuron<Type> *pDstNeur = nullptr;
+	AbsNeuron<Type> *pSrcNeur = nullptr;
 
 	LayerTypeFlag fType = 0;
 
@@ -117,11 +109,11 @@ void AbsNet<Type>::CreateNet(const ConTable<Type> &Net) {
 		pDstNeur = pDstLayer->GetNeuron(iDstNeurID);
 		pSrcNeur = pSrcLayer->GetNeuron(iSrcNeurID);
 		
-		// Check for NULL pointers
-		assert(pDstLayer != NULL);
-		assert(pSrcLayer != NULL);
-		assert(pDstNeur != NULL);
-		assert(pSrcNeur != NULL);
+		// Check for nullptr pointers
+		assert(pDstLayer != nullptr);
+		assert(pSrcLayer != nullptr);
+		assert(pDstNeur != nullptr);
+		assert(pSrcNeur != nullptr);
 
 		//Connect neurons with edge
 		ANN::Connect<Type>(pSrcNeur, pDstNeur, fEdgeValue, 0.f, true);
@@ -149,7 +141,7 @@ template <class Type>
 std::vector<Type> AbsNet<Type>::TrainFromData(const unsigned int &iCycles, const Type &fTolerance, const bool &bBreak, Type &fProgress) {
 	std::vector<Type> pErrors;
 
-	if(m_pTrainingData == NULL)
+	if(m_pTrainingData == nullptr)
 		return pErrors;
 
 	Type fCurError 	= 0.f;
@@ -210,7 +202,7 @@ std::vector<AbsLayer<Type>*> AbsNet<Type>::GetLayers() const {
 
 template <class Type>
 AbsLayer<Type>* AbsNet<Type>::GetLayer(const unsigned int &iID) const {
-	assert( m_lLayers.at(iID) != NULL );
+	assert( m_lLayers.at(iID) != nullptr );
 	assert( iID < m_lLayers.size() );
 
 	return m_lLayers.at(iID);
@@ -218,7 +210,7 @@ AbsLayer<Type>* AbsNet<Type>::GetLayer(const unsigned int &iID) const {
 
 template <class Type>
 void AbsNet<Type>::SetInput(const std::vector<Type> &inputArray) {
-	assert( m_pIPLayer != NULL );
+	assert( m_pIPLayer != nullptr );
 	assert( inputArray.size() <= m_pIPLayer->GetNeurons().size() );
 
 	AbsNeuron<Type> *pCurNeuron;
@@ -254,14 +246,14 @@ void AbsNet<Type>::SetInput(Type *inputArray, const unsigned int &size, const un
 
 template <class Type>
 Type AbsNet<Type>::SetOutput(const std::vector<Type> &outputArray) {
-	assert( m_pOPLayer != NULL );
+	assert( m_pOPLayer != nullptr );
 	assert( outputArray.size() == m_pOPLayer->GetNeurons().size() );
 
 	PropagateFW();
 
 	Type fError 		= 0.f;
 	Type fCurError 	= 0.f;
-	AbsNeuron<Type> *pCurNeuron = NULL;
+	AbsNeuron<Type> *pCurNeuron = nullptr;
 	for(unsigned int i = 0; i < m_pOPLayer->GetNeurons().size(); i++) {
 		pCurNeuron = m_pOPLayer->GetNeuron(i);
 		fCurError = outputArray[i] - pCurNeuron->GetValue();
@@ -280,7 +272,7 @@ Type AbsNet<Type>::SetOutput(const std::vector<Type> &outputArray, const unsigne
 
 	Type fError = 0.f;
 	Type fCurError = 0.f;
-	AbsNeuron<Type> *pCurNeuron = NULL;
+	AbsNeuron<Type> *pCurNeuron = nullptr;
 	for(unsigned int i = 0; i < m_lLayers[layerID]->GetNeurons().size(); i++) {
 		pCurNeuron = m_lLayers[layerID]->GetNeuron(i);
 		fCurError = outputArray[i] - pCurNeuron->GetValue();
@@ -299,7 +291,7 @@ Type AbsNet<Type>::SetOutput(Type *outputArray, const unsigned int &size, const 
 
 	Type fError 		= 0.f;
 	Type fCurError 	= 0.f;
-	AbsNeuron<Type> *pCurNeuron = NULL;
+	AbsNeuron<Type> *pCurNeuron = nullptr;
 	for(unsigned int i = 0; i < m_lLayers[layerID]->GetNeurons().size(); i++) {
 		pCurNeuron = m_lLayers[layerID]->GetNeuron(i);
 		fCurError = outputArray[i] - pCurNeuron->GetValue();
@@ -313,7 +305,7 @@ template <class Type>
 void AbsNet<Type>::SetTrainingSet(const TrainingSet<Type> *pData) {
 	assert(pData);
 
-	if( pData != NULL ) {
+	if( pData != nullptr ) {
 		m_pTrainingData = const_cast<TrainingSet<Type> *>(pData);
 	}
 }
@@ -360,7 +352,7 @@ void AbsNet<Type>::SetOPLayer(const unsigned int iID) {
 
 template <class Type>
 std::vector<Type> AbsNet<Type>::GetOutput() {
-	assert( m_pOPLayer != NULL );
+	assert( m_pOPLayer != nullptr );
 
 	std::vector<Type> vResult;
 	for(unsigned int i = 0; i < GetOPLayer()->GetNeurons().size(); i++) {
@@ -400,7 +392,7 @@ void AbsNet<Type>::ExpToFS(std::string path) {
 		m_pTrainingData->ExpToFS(bz2out, iBZ2Error);
 	}
 
-	BZ2_bzWriteClose ( &iBZ2Error, bz2out, 0, NULL, NULL );
+	BZ2_bzWriteClose ( &iBZ2Error, bz2out, 0, nullptr, nullptr );
 	fclose( fout );
 }
 
@@ -413,7 +405,7 @@ void AbsNet<Type>::ImpFromFS(std::string path) {
 
 	FILE *fin = fopen(path.c_str(), "rb");
 	BZFILE* bz2in;
-	bz2in = BZ2_bzReadOpen(&iBZ2Error, fin, 0, 0, NULL, 0);
+	bz2in = BZ2_bzReadOpen(&iBZ2Error, fin, 0, 0, nullptr, 0);
 
 	if (iBZ2Error != BZ_OK) {
 		ANN::printf("error in ImpFromFS(): %d\n", iBZ2Error);

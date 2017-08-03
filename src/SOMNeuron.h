@@ -39,12 +39,11 @@ class SOMNeuron : public AbsNeuron<Type> {
 protected:
 	Type 	m_fLearningRate; 	// learning rate
 	Type 	m_fInfluence; 		// distance of neurons in neighborhood to alterate
-	Type 	m_fConscience; 		// bias for conscience mechanism
 	Type	m_fSigma0;		// inital distance bias to get activated
 	Type	m_fSigmaT;		// current epoch dependent distance bias
 
 public:
-	SOMNeuron(SOMLayer<Type> *parent = 0);
+	SOMNeuron(SOMLayer<Type> *parent = nullptr);
 
 	/**
 	 * @brief Save neuron's content to filesystem
@@ -115,22 +114,6 @@ public:
 	 */
 	Type GetDistance2Neur(const SOMNeuron<Type> &pNeurDst);
 	
-	/**
-	 * @brief Sets the scalar for the conscience mechanism. If it is zero, then conscience is not applied.
-	 */
-	void SetConscience(const Type &fVal);
-	
-	/**
-	 * @brief Adds the given value to the conscience scalar
-	 */
-	void AddConscience(const Type &fVal);
-	
-	/**
-	 * @brief Returns the conscience scalar of the network. If it is zero, then conscience is not applied.
-	 * @return Get the bias for the conscience mechanism
-	 */
-	Type GetConscience();
-	
 #ifdef __SOMNeuron_ADDON
 	#include __SOMNeuron_ADDON
 #endif
@@ -147,7 +130,7 @@ template <typename T> T GetDistance2Neur(const SOMNeuron<T> &pNeurSrc, const SOM
 	assert(pNeurSrc.GetPosition().size() == pNeurDst.GetPosition().size() );
 
 	T fDist = 0.f;
-	for(unsigned int i = 0; i < pNeurSrc.GetPosition().size(); i++) {
+	for(uint32_t i = 0; i < pNeurSrc.GetPosition().size(); i++) {
 		fDist += pow(pNeurDst.GetPosition().at(i) - pNeurSrc.GetPosition().at(i), 2);
 	}
 	return sqrt(fDist);

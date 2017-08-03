@@ -39,17 +39,10 @@ template <class Type, class Functor>
 class BPNeuron : public AbsNeuron<Type> {
 private:
 	Functor m_TransferFunction;
-	HebbianConf<Type> m_Setup;
+	HebbianConf<Type> m_Setup = { 0.1f, 0, 0 };
 
 public:
-	BPNeuron();
-	BPNeuron(AbsLayer<Type> *parentLayer);
-	/**
-	 * Copy constructor for creation of a new neuron with the "same" properties like *pNeuron
-	 * this constructor can't copy connections (edges), because they normally have dependencies to other neurons.
-	 * @param pNeuron object to copy properties from
-	 */
-	BPNeuron(BPNeuron<Type, Functor> *pNeuron);
+	BPNeuron(AbsLayer<Type> *parentLayer = nullptr);
 
 	/**
 	 * Define the learning rate, the weight decay and the momentum term.

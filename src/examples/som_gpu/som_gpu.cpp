@@ -5,6 +5,9 @@
  *      Author: dgrat
  */
 
+#include <iomanip>
+#include <map>
+
 #include <ANNet>
 #include <ANGPGPU>
 #include <ANContainers>
@@ -36,7 +39,7 @@ int main(int argc, char *argv[]) {
 	ANNGPGPU::SOMNetGPU<float, ANN::functor_gaussian<float>> gpu;
 	gpu.CreateSOM(3, 1, w1,w1);
 	gpu.SetTrainingSet(input);
-	
+/*
         // Clear initial weights
         for(int x = 0; x < w1*w1; x++) {
             ANN::SOMNeuron<float> *pNeur = (ANN::SOMNeuron<float>*)((ANN::SOMLayer<float>*)gpu.GetOPLayer())->GetNeuron(x);
@@ -50,8 +53,8 @@ int main(int argc, char *argv[]) {
                 pNeur->GetConI(2)->SetValue(1); 
             }
         }
-	
-	gpu.Training(1);
+*/
+	gpu.Training(100);
 
 	SOMReader w(w1, w1, w2);
 	for(int x = 0; x < w1*w1; x++) {
@@ -63,6 +66,19 @@ int main(int argc, char *argv[]) {
 		w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
 	}
 	w.Save("ColorsByGPU.png");
+	
+	std::vector<ANN::Centroid<float>> cents = gpu.FindAllCentroids();
+	for(auto centr : cents) {
+		std::cout 
+		<< std::setprecision(2)
+		<< "ID: " << centr._unitID 
+		<< ", distance: " << centr._distance
+		<< std::endl
+		<< "\tinput: " << centr._input[0] << ";" << centr._input[1] << ";" << centr._input[2]
+		<< std::endl
+		<< "\tedges: " << centr._edges[0] << ";" << centr._edges[1] << ";" << centr._edges[2]
+		<< std::endl;
+	}
 
 	return 0;
 }

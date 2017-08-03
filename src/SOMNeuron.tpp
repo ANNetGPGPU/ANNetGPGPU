@@ -17,10 +17,9 @@
 template <class Type>
 SOMNeuron<Type>::SOMNeuron(SOMLayer<Type> *parent) : AbsNeuron<Type>(parent) {
 	m_fLearningRate = 0.5f;
-	m_fConscience = 0.f;
 
 	// gives neuron random coordinates
-	for(unsigned int i = 0; i < this->m_vPosition.size(); i++) {
+	for(uint32_t i = 0; i < this->m_vPosition.size(); i++) {
 		int iMax = parent->GetDim(i) * 10;
 		this->m_vPosition[i] = GetRandReal<Type>(0, iMax);
 	}
@@ -52,11 +51,11 @@ void SOMNeuron<Type>::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable<Type> &Ta
 
 template <class Type>
 void SOMNeuron<Type>::AdaptEdges() {
-	Edge<Type> *pEdge = NULL;
+	Edge<Type> *pEdge = nullptr;
 	Type fInput = 0.f;
 	Type fWeight = 0.f;
 
-	for(unsigned int i = 0; i < this->GetConsI().size(); i++) {
+	for(uint32_t i = 0; i < this->GetConsI().size(); i++) {
 		pEdge 	= this->GetConI(i);
 		fWeight = *pEdge;
 		fInput 	= *pEdge->GetDestination(this);
@@ -85,7 +84,7 @@ void SOMNeuron<Type>::CalcValue() {
 template <class Type>
 void SOMNeuron<Type>::CalcDistance2Inp() {
 	this->m_fValue = 0.f;
-	for (unsigned int i = 0; i < this->GetConsI().size(); ++i) {
+	for (uint32_t i = 0; i < this->GetConsI().size(); ++i) {
 		this->m_fValue += std::pow(*this->GetConI(i)->GetDestination(this) - *this->GetConI(i), 2);	// both have a Type() operator!
 	}
 	this->m_fValue = std::sqrt(this->m_fValue);
@@ -116,24 +115,8 @@ Type SOMNeuron<Type>::GetDistance2Neur(const SOMNeuron &pNeurDst) {
 	assert(this->GetPosition().size() == pNeurDst.GetPosition().size() );
 
 	Type fDist = 0.f;
-	for(unsigned int i = 0; i < this->GetPosition().size(); i++) {
+	for(uint32_t i = 0; i < this->GetPosition().size(); i++) {
 		fDist += pow(pNeurDst.GetPosition().at(i) - this->GetPosition().at(i), 2);
 	}
 	return sqrt(fDist);
 }
-
-template <class Type>
-void SOMNeuron<Type>::SetConscience(const Type &fVal) {
-	m_fConscience = fVal;
-}
-
-template <class Type>
-void SOMNeuron<Type>::AddConscience(const Type &fVal) {
-	m_fConscience += fVal;
-}
-
-template <class Type>
-Type SOMNeuron<Type>::GetConscience() {
-	return m_fConscience;
-}
-

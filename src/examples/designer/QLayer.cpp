@@ -26,7 +26,7 @@ int Layer::getID() const {
 }
 
 void Layer::refreshNodeIDs() {
-    for(unsigned int i = 0; i < m_NodeList.size(); i++) {
+    for(int i = 0; i < m_NodeList.size(); i++) {
     	Node *pNode = m_NodeList.at(i);
     	pNode->setID(i);
     }
@@ -59,15 +59,15 @@ void Layer::adjust() {
     m_BoundingRect = boundingRect();
 
     float   fTextBoxHeight = 24.f;
-    m_LabelRect = QRectF(	m_BoundingRect.x(),
-							m_BoundingRect.y()+m_BoundingRect.height(),
-							m_BoundingRect.width(),
-							fTextBoxHeight);
+    m_LabelRect = QRectF(m_BoundingRect.x(),
+			m_BoundingRect.y()+m_BoundingRect.height(),
+			m_BoundingRect.width(),
+			fTextBoxHeight);
 
-    m_ZLabelRect = QRectF(	m_BoundingRect.x()+m_BoundingRect.width(),
-							m_BoundingRect.y()+m_BoundingRect.height(),
-							fTextBoxHeight*1.5,
-							fTextBoxHeight);
+    m_ZLabelRect = QRectF(m_BoundingRect.x()+m_BoundingRect.width(),
+			m_BoundingRect.y()+m_BoundingRect.height(),
+			fTextBoxHeight*1.5,
+			fTextBoxHeight);
 
     if(m_pLabel != NULL) {
         m_pLabel->setBRect(m_LabelRect);

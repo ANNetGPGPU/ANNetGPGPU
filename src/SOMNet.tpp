@@ -14,86 +14,40 @@
    Author: Daniel Frenzel (dgdanielf@gmail.com)
 */
 
-template<class Type, class Functor>
-SOMNet<Type, Functor>::SOMNet() {
-	this->m_pIPLayer = NULL;
-	this->m_pOPLayer = NULL;
-	
-	m_pBMNeuron = NULL;
-	m_iCycle = 0;
-	m_iWidthI = 0.f;
-	m_iHeightI = 0.f;
-	m_iWidthO = 0.f;
-	m_iHeightO = 0.f;
-	
-	// Conscience mechanism
-	m_fConscienceRate 	= 0.f;
-	this->m_fTypeFlag 	= ANNetSOM;
-}
 
 template<class Type, class Functor>
 SOMNet<Type, Functor>::SOMNet(AbsNet<Type> *pNet) {
-	if(pNet == NULL)
-		return;
+	this->m_fTypeFlag = ANNetSOM;
+	if(pNet == nullptr) return;
 
-	std::vector<unsigned int> vDimI = ((SOMLayer<Type>*)(pNet->GetIPLayer() ))->GetDim();
-	std::vector<unsigned int> vDimO = ((SOMLayer<Type>*)(pNet->GetOPLayer() ))->GetDim();
+	std::vector<uint32_t> vDimI = ((SOMLayer<Type>*)(pNet->GetIPLayer() ))->GetDim();
+	std::vector<uint32_t> vDimO = ((SOMLayer<Type>*)(pNet->GetOPLayer() ))->GetDim();
 
 	// Copy weights between neurons of the input and output layer
 	ANN::F2DArray<Type> f2dEdges = pNet->GetOPLayer()->ExpEdgesIn();
 	// Copy positions of the neurons in the output layer
 	ANN::F2DArray<Type> f2dPosistions = pNet->GetOPLayer()->ExpPositions();
+
 	// Create the net finally
 	CreateSOM(vDimI, vDimO, f2dEdges, f2dPosistions);
 	// Copy training set
 	ANN::AbsNet<Type>::SetTrainingSet(pNet->GetTrainingSet() );
-
-	this->m_fTypeFlag 	= ANNetSOM;
 }
 
 template<class Type, class Functor>
-SOMNet<Type, Functor>::SOMNet(const std::vector<unsigned int> &vDimI, const std::vector<unsigned int> &vDimO) {
-	this->m_pIPLayer = NULL;
-	this->m_pOPLayer = NULL;
-	m_pBMNeuron = NULL;
-
-	m_iCycle = 0;
+SOMNet<Type, Functor>::SOMNet( const std::vector<uint32_t> &vDimI, 
+			       const std::vector<uint32_t> &vDimO) {
 	SetLearningRate(0.5f);
-
-	m_iWidthI = 0.f;
-	m_iHeightI = 0.f;
-	m_iWidthO = 0.f;
-	m_iHeightO = 0.f;
-	
-	// Conscience mechanism
-	m_fConscienceRate = 0.f;
-
 	this->m_fTypeFlag = ANNetSOM;
-	
 	CreateSOM(vDimI, vDimO);
 }
 
 template<class Type, class Functor>
-SOMNet<Type, Functor>::SOMNet(	const unsigned int &iWidthI, const unsigned int &iHeightI,
-		const unsigned int &iWidthO, const unsigned int &iHeightO) 
+SOMNet<Type, Functor>::SOMNet( const uint32_t &iWidthI, const uint32_t &iHeightI,
+			       const uint32_t &iWidthO, const uint32_t &iHeightO) 
 {
-	this->m_pIPLayer = NULL;
-	this->m_pOPLayer = NULL;
-	m_pBMNeuron = NULL;
-
-	m_iCycle = 0;
 	SetLearningRate(0.5f);
-
-	m_iWidthI = 0.f;
-	m_iHeightI = 0.f;
-	m_iWidthO = 0.f;
-	m_iHeightO = 0.f;
-	
-	// Conscience mechanism
-	m_fConscienceRate = 0.f;
-
 	this->m_fTypeFlag = ANNetSOM;
-	
 	CreateSOM(iWidthI, iHeightI, iWidthO, iHeightO);
 }
 
@@ -103,7 +57,7 @@ void SOMNet<Type, Functor>::AddLayer(AbsLayer<Type> *pLayer) {
 }
 
 template<class Type, class Functor>
-AbsLayer<Type> *SOMNet<Type, Functor>::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
+AbsLayer<Type> *SOMNet<Type, Functor>::AddLayer(const uint32_t &iSize, const LayerTypeFlag &flType) {
 	AbsLayer<Type> *pRet = new SOMLayer<Type>(iSize, flType);
 	AbsNet<Type>::AddLayer(pRet);
 	return pRet;
@@ -121,7 +75,7 @@ void SOMNet<Type, Functor>::CreateNet(const ConTable<Type> &Net) {
 	/*
 	 * Set Positions
 	 */
-	for(unsigned int i = 0; i < Net.Neurons.size(); i++) {
+	for(uint32_t i = 0; i < Net.Neurons.size(); i++) {
 		int iLayerID 	= Net.Neurons.at(i).m_iLayerID;
 		int iNeurID 	= Net.Neurons.at(i).m_iNeurID;
 		
@@ -144,17 +98,17 @@ template<class Type, class Functor>
 void SOMNet<Type, Functor>::FindSigma0() {
 	SOMLayer<Type> *pLayer  = (SOMLayer<Type>*)this->GetOPLayer();
 	SOMNeuron<Type> *pNeuron = (SOMNeuron<Type>*)pLayer->GetNeuron(0);
-	unsigned int iSize = pLayer->GetNeurons().size();
+	uint32_t iSize = pLayer->GetNeurons().size();
 
-	unsigned int iDim = pNeuron->GetPosition().size();
+	uint32_t iDim = pNeuron->GetPosition().size();
 	std::vector<Type> vDimMax(iDim, 0.f);
 	std::vector<Type> vDimMin(iDim, std::numeric_limits<Type>::max() );
 
 	// look in all the nodes
-	for(unsigned int i = 0; i < iSize; i++) {
+	for(uint32_t i = 0; i < iSize; i++) {
 		pNeuron = (SOMNeuron<Type>*)pLayer->GetNeuron(i);
 		// find the smallest and greatest positions in the network
-		for(unsigned int j = 0; j < iDim; j++) {
+		for(uint32_t j = 0; j < iDim; j++) {
 			// find greatest coordinate
 			vDimMin[j] = std::min(vDimMin[j], pNeuron->GetPosition().at(j) );
 			vDimMax[j] = std::max(vDimMax[j], pNeuron->GetPosition().at(j) );
@@ -184,8 +138,8 @@ void SOMNet<Type, Functor>::SetSigma0(const Type &fVal) {
 }
 
 template<class Type, class Functor>
-void SOMNet<Type, Functor>::CreateSOM(const std::vector<unsigned int> &vDimI, const std::vector<unsigned int> &vDimO) {
-	if(this->m_pIPLayer != NULL || this->m_pOPLayer != NULL) {
+void SOMNet<Type, Functor>::CreateSOM(const std::vector<uint32_t> &vDimI, const std::vector<uint32_t> &vDimO) {
+	if(this->m_pIPLayer != nullptr || this->m_pOPLayer != nullptr) {
 		AbsNet<Type>::EraseAll();
 	}
 
@@ -207,9 +161,9 @@ void SOMNet<Type, Functor>::CreateSOM(const std::vector<unsigned int> &vDimI, co
 }
 
 template<class Type, class Functor>
-void SOMNet<Type, Functor>::CreateSOM(const std::vector<unsigned int> &vDimI, const std::vector<unsigned int> &vDimO,
+void SOMNet<Type, Functor>::CreateSOM(const std::vector<uint32_t> &vDimI, const std::vector<uint32_t> &vDimO,
 		const F2DArray<Type> &f2dEdgeMat, const F2DArray<Type> &f2dNeurPos) {
-	if(this->m_pIPLayer != NULL || this->m_pOPLayer != NULL) {
+	if(this->m_pIPLayer != nullptr || this->m_pOPLayer != nullptr) {
 		AbsNet<Type>::EraseAll();
 	}
 
@@ -224,8 +178,7 @@ void SOMNet<Type, Functor>::CreateSOM(const std::vector<unsigned int> &vDimI, co
 	AbsNet<Type>::AddLayer(this->m_pOPLayer);
 
 	ANN::printf("Connect layers ..\n");
-	((SOMLayer<Type>*)this->m_pIPLayer)->ConnectLayer(this->m_pOPLayer, f2dEdgeMat);
-
+	static_cast<SOMLayer<Type>*>(this->m_pIPLayer)->ConnectLayer(this->m_pOPLayer, f2dEdgeMat);
 	this->m_pOPLayer->ImpPositions(f2dNeurPos);
 
 	// find sigma0
@@ -233,10 +186,10 @@ void SOMNet<Type, Functor>::CreateSOM(const std::vector<unsigned int> &vDimI, co
 }
 
 template<class Type, class Functor>
-void SOMNet<Type, Functor>::CreateSOM(	const unsigned int &iWidthI, const unsigned int &iHeightI,
-						const unsigned int &iWidthO, const unsigned int &iHeightO)
+void SOMNet<Type, Functor>::CreateSOM(	const uint32_t &iWidthI, const uint32_t &iHeightI,
+					const uint32_t &iWidthO, const uint32_t &iHeightO)
 {
-	if(this->m_pIPLayer != NULL || this->m_pOPLayer != NULL) {
+	if(this->m_pIPLayer != nullptr || this->m_pOPLayer != nullptr) {
 		AbsNet<Type>::EraseAll();
 	}
 
@@ -263,7 +216,7 @@ void SOMNet<Type, Functor>::CreateSOM(	const unsigned int &iWidthI, const unsign
 }
 
 template<class Type, class Functor>
-void SOMNet<Type, Functor>::TrainHelper(unsigned int i) {
+void SOMNet<Type, Functor>::TrainHelper(uint32_t i) {
 	assert(i < this->GetTrainingSet()->GetNrElements() );
 	
 	this->SetInput(this->GetTrainingSet()->GetInput(i) );
@@ -276,10 +229,10 @@ void SOMNet<Type, Functor>::TrainHelper(unsigned int i) {
 }
 
 template<class Type, class Functor>
-void SOMNet<Type, Functor>::Training(const unsigned int &iCycles, const TrainingMode &eMode) {
+void SOMNet<Type, Functor>::Training(const uint32_t &iCycles, const TrainingMode &eMode) {
 	assert(iCycles > 0);
 	
-	if(this->GetTrainingSet() == NULL) {
+	if(this->GetTrainingSet() == nullptr) {
 		ANN::printf("No training set available\n");
 		return;
 	}
@@ -287,10 +240,10 @@ void SOMNet<Type, Functor>::Training(const unsigned int &iCycles, const Training
 	m_iCycles = iCycles;
 	int iMin = 0;
 	int iMax = this->GetTrainingSet()->GetNrElements()-1;
-	unsigned int iProgCount = 1;
+	uint32_t iProgCount = 1;
 
 	ANN::printf("Start calculation now\n");
-	for(m_iCycle = 0; m_iCycle < static_cast<unsigned int>(m_iCycles); m_iCycle++) {
+	for(m_iCycle = 0; m_iCycle < static_cast<uint32_t>(m_iCycles); m_iCycle++) {
 		if(m_iCycles >= 10) {
 			if(((m_iCycle+1) / (m_iCycles/10)) == iProgCount && (m_iCycle+1) % (m_iCycles/10) == 0) {
 				ANN::printf("Current training progress calculated by the CPU is %f%%/Step: %d/%d\n", iProgCount*10.f, m_iCycle+1, m_iCycles);
@@ -302,12 +255,12 @@ void SOMNet<Type, Functor>::Training(const unsigned int &iCycles, const Training
 
 		// The input vectors are presented to the network at random
 		if(eMode == ANN::ANRandomMode) {
-			unsigned int iRandID = GetRandInt(iMin, iMax);
+			uint32_t iRandID = GetRandInt(iMin, iMax);
 			TrainHelper(iRandID);
 		}
 		// The input vectors are presented to the network in serial order
 		else if(eMode == ANN::ANSerialMode) {
-			for(unsigned int i = 0; i < this->GetTrainingSet()->GetNrElements(); i++) {
+			for(uint32_t i = 0; i < this->GetTrainingSet()->GetNrElements(); i++) {
 				TrainHelper(i);
 			}
 		}
@@ -324,7 +277,6 @@ void SOMNet<Type, Functor>::PropagateBW() {
 		
 		Type fLambda = this->m_iCycles / log(pNeuron->GetSigma0() ); // time constant
 		Type fSigmaT = this->m_DistFunction.rad_decay(pNeuron->GetSigma0(), this->m_iCycle, fLambda);		
-		Type fLearningRateT = this->m_DistFunction.lrate_decay(pNeuron->GetLearningRate(), this->m_iCycle, this->m_iCycles);
 		Type fDist = pNeuron->GetDistance2Neur(*m_pBMNeuron);
 
 		if(fDist < fSigmaT) {
@@ -338,22 +290,22 @@ void SOMNet<Type, Functor>::PropagateBW() {
 }
 
 template<class Type, class Functor>
-std::vector<Centroid<Type>> SOMNet<Type, Functor>::GetCentroidList() {
+std::vector<Centroid<Type>> SOMNet<Type, Functor>::FindAllCentroids() {
 	std::vector<Centroid<Type>> vCentroids;
-	for(unsigned int i = 0; i < this->GetTrainingSet()->GetNrElements(); i++) {
-		vCentroids.push_back(Centroid<Type>() );
-		this->SetInput(this->GetTrainingSet()->GetInput(i) );
-
+	for(uint32_t i = 0; i < this->GetTrainingSet()->GetNrElements(); i++) {
 		// Present the input vector to each node and determine the BMU
+		this->SetInput(this->GetTrainingSet()->GetInput(i) );
 		FindBMNeuron();
-		
-		vCentroids[i].m_iBMUID 	= m_pBMNeuron->GetID();
-		vCentroids[i].m_vCentroid.clear();
-		for(unsigned int j = 0; j < m_pBMNeuron->GetConsI().size(); j++) {
-			vCentroids[i].m_vCentroid.push_back(m_pBMNeuron->GetConI(j)->GetValue());
+
+		Centroid<Type> centr;
+		centr._unitID = m_pBMNeuron->GetID();
+		for(uint32_t j = 0; j < m_pBMNeuron->GetConsI().size(); j++) {
+			centr._edges.push_back(m_pBMNeuron->GetConI(j)->GetValue());
 		}
-		vCentroids[i].m_vInput = this->GetTrainingSet()->GetInput(i);
-		vCentroids[i].m_fEucDist = m_pBMNeuron->GetValue();
+		centr._input = this->GetTrainingSet()->GetInput(i);
+		centr._distance = m_pBMNeuron->GetValue();
+		
+		vCentroids.push_back(centr);
 	}
 	return vCentroids;
 }
@@ -373,11 +325,10 @@ void SOMNet<Type, Functor>::SetLearningRate(const Type &fVal) {
 
 template<class Type, class Functor>
 void SOMNet<Type, Functor>::FindBMNeuron() {
-	assert(this->m_pIPLayer != NULL && this->m_pOPLayer != NULL);
+	assert(this->m_pIPLayer != nullptr && this->m_pOPLayer != nullptr);
 
-	Type fCurVal 	= 0.f;
+	Type fCurVal = 0.f;
 	Type fSmallest = std::numeric_limits<Type>::max();
-	Type fNrOfNeurons 	= (Type)(this->m_pOPLayer->GetNeurons().size() );
 
 	//#pragma omp parallel for
 	for(int i = 0; i < static_cast<int>(this->m_pOPLayer->GetNeurons().size() ); i++) {
@@ -385,46 +336,18 @@ void SOMNet<Type, Functor>::FindBMNeuron() {
 		pNeuron->CalcDistance2Inp();
 		fCurVal = pNeuron->GetValue();
 
-		// with implementation of conscience mechanism (2nd term)
-		Type fConscienceBias = 1.f/fNrOfNeurons - pNeuron->GetConscience();
-		if(m_fConscienceRate > 0.f) {
-			fCurVal -= fConscienceBias;
-		}
-		// end of implementation of conscience mechanism
-
 		if(fSmallest > fCurVal) {
 			fSmallest = fCurVal;
 			m_pBMNeuron = pNeuron;
 		}
 	}
-
-	// implementation of conscience mechanism
-	//Type fConscience = m_fConscienceRate * (m_pBMNeuron->GetValue() - m_pBMNeuron->GetConscience() ); // standard implementation seems to have some problems
-	//m_pBMNeuron->AddConscience(fConscience); // standard implementation seems to have some problems
-	if(m_fConscienceRate > 0.f) {
-		#pragma omp parallel for
-		for(int i = 0; i < static_cast<int>(this->m_pOPLayer->GetNeurons().size() ); i++) {
-			SOMNeuron<Type> *pNeuron = (SOMNeuron<Type>*)this->m_pOPLayer->GetNeuron(i);
-			Type fConscience = m_fConscienceRate * (pNeuron->GetValue() - pNeuron->GetConscience() );
-			pNeuron->SetConscience(fConscience);
-		}
-	}
+	
 	// end of implementation of conscience mechanism
-	assert(m_pBMNeuron != NULL);
+	assert(m_pBMNeuron != nullptr);
 }
 
 template<class Type, class Functor>
-void SOMNet<Type, Functor>::SetConscienceRate(const Type &fVal) {
-	m_fConscienceRate = fVal;
-}
-
-template<class Type, class Functor>
-Type SOMNet<Type, Functor>::GetConscienceRate() {
-	return m_fConscienceRate;
-}
-
-template<class Type, class Functor>
-std::vector<Type> SOMNet<Type, Functor>::GetPosition(const unsigned int iNeuronID) {
+std::vector<Type> SOMNet<Type, Functor>::GetPosition(const uint32_t iNeuronID) {
 	std::vector<Type> vPos = ((ANN::SOMLayer<Type>*)this->m_pOPLayer)->GetPosition(iNeuronID);
 	return vPos;
 }

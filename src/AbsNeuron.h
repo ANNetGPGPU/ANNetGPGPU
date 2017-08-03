@@ -46,27 +46,19 @@ template <class Type>
 class AbsNeuron {
 protected:
 	std::vector<Type> m_vPosition;			// x, y, z, .. coordinates of the neuron (e.g. SOM)
-	Type m_fValue;					// value of the neuron in the net
-	Type m_fErrorDelta;				// Current error delta of this neuron
-	AbsLayer<Type> *m_pParentLayer;			// layer which is inheriting this neuron
-	int m_iNeuronID;				// ID of this neuron in the layer
+	Type m_fValue = GetRandReal(-0.5f, 0.5f);	// value of the neuron in the net
+	Type m_fErrorDelta = 0;				// Current error delta of this neuron
+	AbsLayer<Type> *m_pParentLayer = nullptr;	// layer which is inheriting this neuron
+	int m_iNeuronID = -1;				// ID of this neuron in the layer
 
 	std::vector<Edge<Type>*> m_lOutgoingConnections;
 	std::vector<Edge<Type>*> m_lIncomingConnections;
 
 public:
-	AbsNeuron();
-	
 	/**
 	 * @brief Creates a new neuron with parent layer: *pParentLayer
 	 */
-	AbsNeuron(AbsLayer<Type> *pParentLayer);
-	/**
-	 * @brief Copy constructor for creation of a new neuron with the "same" properties like *pNeuron. 
-	 * This constructor can't copy connections (edges), because they normally have dependencies to other neurons.
-	 * @param pNeuron object to copy properties from
-	 */
-	AbsNeuron(const AbsNeuron<Type> *pNeuron);
+	AbsNeuron(AbsLayer<Type> *pParentLayer = nullptr);
 	virtual ~AbsNeuron();
 	
 	/**

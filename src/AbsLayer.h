@@ -64,7 +64,6 @@ protected:
 	LayerTypeFlag m_fTypeFlag;
 
 public:
-	AbsLayer();
 	virtual ~AbsLayer();
 
 	/**
@@ -80,13 +79,6 @@ public:
 	 * @brief Returns the current ID in the Network inheriting the layer. Useful for administration purposes.
 	 */
 	virtual int GetID() const;
-
-	/**
-	 * @brief Resizes the layer. Deletes old neurons and adds new ones (initialized with random values).
-	 * @param iSize New number of neurons.
-	 * @param iShiftID When called each neuron created gets an ID defined in this function plus the value of iShiftID. Used for example in ANHFLayer, when creating 2d matrix.
-	 */
-	virtual void Resize(const unsigned int &iSize) = 0;
 
 	/**
 	 * @brief Pointer to the neuron at index iID.
@@ -123,7 +115,7 @@ public:
 	virtual LayerTypeFlag GetFlag() const;
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	/** 
 	 * @brief Exports the layer to a plain array
 	 * \n Matrix layout:

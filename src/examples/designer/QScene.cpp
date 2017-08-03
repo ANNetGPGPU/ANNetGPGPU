@@ -163,13 +163,13 @@ void Scene::adjust() {
 }
 
 void Scene::refreshLayerIDs() {
-    for(unsigned int i = 0; i < m_lLayers.size(); i++) {
+    for(uint32_t i = 0; i < (uint32_t)m_lLayers.size(); i++) {
     	Layer *pLayer = m_lLayers.at(i);
     	pLayer->setID(i);
     }
 }
 
-Layer* Scene::addLayer(const unsigned int &iNodes, const QPointF &fPos, const QString &sName) {
+Layer* Scene::addLayer(const uint32_t &iNodes, const QPointF &fPos, const QString &sName) {
     Layer *pLayer = new Layer;
     pLayer->setScene(this);
 

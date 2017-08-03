@@ -51,10 +51,10 @@
 		ostrs << "[";
 		for(unsigned int i = 0; i < $self->size(); i++) {
 			ostrs << "[";
-			for(unsigned int j = 0; j < $self->at(i).m_vCentroid.size(); j++) {
-				float fVal = static_cast<float>($self->at(i).m_vCentroid.at(j)); 
+			for(unsigned int j = 0; j < $self->at(i)._edges.size(); j++) {
+				float fVal = static_cast<float>($self->at(i)._edges[j]); 
 				ostrs << fVal;
-				if(j < $self->at(i).m_vCentroid.size()-1) {
+				if(j < $self->at(i)._edges.size()-1) {
 					ostrs << ", ";
 				}
 			}

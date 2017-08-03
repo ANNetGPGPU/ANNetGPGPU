@@ -14,28 +14,9 @@
    Author: Daniel Frenzel (dgdanielf@gmail.com)
 */
 
-template <class Type>
-AbsNeuron<Type>::AbsNeuron() {
-	m_fValue = GetRandReal(-0.5f, 0.5f);
-	m_fErrorDelta = 0;
-	m_pParentLayer = NULL;
-}
 
 template <class Type>
 AbsNeuron<Type>::AbsNeuron(AbsLayer<Type> *parentLayer) : m_pParentLayer(parentLayer) {
-	m_fValue = GetRandReal(-0.5f, 0.5f);
-	m_fErrorDelta = 0;
-}
-
-template <class Type>
-AbsNeuron<Type>::AbsNeuron(const AbsNeuron<Type> *pNeuron) {
-	Type fErrorDelta 	= pNeuron->GetErrorDelta();
-	Type fValue 		= pNeuron->GetValue();
-	int iID 		= pNeuron->GetID();
-
-	this->SetErrorDelta(fErrorDelta);
-	this->SetValue(fValue);
-	this->SetID(iID);
 }
 
 template <class Type>

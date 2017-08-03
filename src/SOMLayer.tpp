@@ -21,35 +21,35 @@ SOMLayer<Type>::SOMLayer() {
 
 template <class Type>
 SOMLayer<Type>::SOMLayer(const SOMLayer<Type> *pLayer) {
-	int iNumber 			= pLayer->GetNeurons().size();
-	LayerTypeFlag fType 	= pLayer->GetFlag();
+	int iNumber = pLayer->GetNeurons().size();
+	LayerTypeFlag fType = pLayer->GetFlag();
 
 	Resize(iNumber);
 	this->SetFlag(fType);
 }
 
 template <class Type>
-SOMLayer<Type>::SOMLayer(const unsigned int &iSize, LayerTypeFlag fType) {
+SOMLayer<Type>::SOMLayer(const uint32_t &iSize, LayerTypeFlag fType) {
 	Resize(iSize);
 	this->SetFlag(fType);
 }
 
 template <class Type>
-SOMLayer<Type>::SOMLayer(const unsigned int &iWidth, const unsigned int &iHeight, LayerTypeFlag fType) {
+SOMLayer<Type>::SOMLayer(const uint32_t &iWidth, const uint32_t &iHeight, LayerTypeFlag fType) {
 	Resize(iWidth, iHeight);
 	this->SetFlag(fType);
 }
 
 template <class Type>
-SOMLayer<Type>::SOMLayer(const std::vector<unsigned int> &vDim, LayerTypeFlag fType) {
+SOMLayer<Type>::SOMLayer(const std::vector<uint32_t> &vDim, LayerTypeFlag fType) {
 	Resize(vDim);
 	this->SetFlag(fType);
 }
 
 template <class Type>
-void SOMLayer<Type>::AddNeurons(const unsigned int &iSize) {
+void SOMLayer<Type>::AddNeurons(const uint32_t &iSize) {
 	std::vector<Type> vPos(1);
-	for(unsigned int x = 0; x < iSize; x++) {
+	for(uint32_t x = 0; x < iSize; x++) {
 		SOMNeuron<Type> *pNeuron = new SOMNeuron<Type>(this);
 		this->m_lNeurons.push_back(pNeuron);
 		pNeuron->SetID(this->m_lNeurons.size()-1);
@@ -60,11 +60,11 @@ void SOMLayer<Type>::AddNeurons(const unsigned int &iSize) {
 }
 
 template <class Type>
-void SOMLayer<Type>::Resize(const unsigned int &iSize) {
+void SOMLayer<Type>::Resize(const uint32_t &iSize) {
 	this->EraseAll();
 
 	std::vector<Type> vPos(1);
-	for(unsigned int x = 0; x < iSize; x++) {
+	for(uint32_t x = 0; x < iSize; x++) {
 		SOMNeuron<Type> *pNeuron = new SOMNeuron<Type>(this);
 		this->m_lNeurons.push_back(pNeuron);
 		pNeuron->SetID(this->m_lNeurons.size()-1);
@@ -75,7 +75,7 @@ void SOMLayer<Type>::Resize(const unsigned int &iSize) {
 }
 
 template <class Type>
-void SOMLayer<Type>::Resize(const unsigned int &iWidth, const unsigned int &iHeight) {
+void SOMLayer<Type>::Resize(const uint32_t &iWidth, const uint32_t &iHeight) {
 	this->EraseAll();
 
 	// Set m_vDim properly
@@ -84,8 +84,8 @@ void SOMLayer<Type>::Resize(const unsigned int &iWidth, const unsigned int &iHei
 	m_vDim.push_back(iHeight);
 
 	std::vector<Type> vPos(2);
-	for(unsigned int y = 0; y < iHeight; y++) {
-		for(unsigned int x = 0; x < iWidth; x++) {
+	for(uint32_t y = 0; y < iHeight; y++) {
+		for(uint32_t x = 0; x < iWidth; x++) {
 			SOMNeuron<Type> *pNeuron = new SOMNeuron<Type>(this);
 			pNeuron->SetID(y*iWidth + x);
 			this->m_lNeurons.push_back(pNeuron);
@@ -97,15 +97,15 @@ void SOMLayer<Type>::Resize(const unsigned int &iWidth, const unsigned int &iHei
 }
 
 template <class Type>
-void SOMLayer<Type>::Resize(const std::vector<unsigned int> &vDim) {
+void SOMLayer<Type>::Resize(const std::vector<uint32_t> &vDim) {
 	this->EraseAll();
 
 	assert(vDim.size() > 0);
 
 	m_vDim = vDim;
 
-	unsigned int iSize = 1;
-	for(unsigned int i = 0; i < vDim.size(); i++) {
+	uint32_t iSize = 1;
+	for(uint32_t i = 0; i < vDim.size(); i++) {
 		iSize *= vDim[i];
 	}
 	Resize(iSize);
@@ -113,7 +113,7 @@ void SOMLayer<Type>::Resize(const std::vector<unsigned int> &vDim) {
 
 template <class Type>
 void SOMLayer<Type>::ConnectLayer(AbsLayer<Type> *pDestLayer, const bool &bAllowAdapt) {
-	AbsNeuron<Type> *pSrcNeuron = NULL;
+	AbsNeuron<Type> *pSrcNeuron = nullptr;
 
 	/*
 	 * Vernetze jedes Neuron dieser Schicht mit jedem Neuron in "pDestLayer"
@@ -122,7 +122,7 @@ void SOMLayer<Type>::ConnectLayer(AbsLayer<Type> *pDestLayer, const bool &bAllow
 		ANN::printf("Connect input neuron %d to output layer.. %d/%d\n", i, i+1, this->m_lNeurons.size());
 		pSrcNeuron = this->m_lNeurons[i];
 		
-		if(pSrcNeuron != NULL) {
+		if(pSrcNeuron != nullptr) {
 			Connect(pSrcNeuron, pDestLayer, bAllowAdapt);
 		}
 	}
@@ -130,29 +130,27 @@ void SOMLayer<Type>::ConnectLayer(AbsLayer<Type> *pDestLayer, const bool &bAllow
 
 template <class Type>
 void SOMLayer<Type>::ConnectLayer(AbsLayer<Type> *pDestLayer, const F2DArray<Type> &f2dEdgeMat, const bool &bAllowAdapt) {
-	AbsNeuron<Type> *pSrcNeuron = NULL;
+	AbsNeuron<Type> *pSrcNeuron = nullptr;
 
-	/*
-	 * Vernetze jedes Neuron dieser Schicht mit jedem Neuron in "pDestLayer"
-	 */
-	std::vector<float> fMoms(f2dEdgeMat.GetH(), 0);	// TODO not used by SOMs
-	std::vector<float> fVals(f2dEdgeMat.GetH(), 0);
+	// Connect each neuron in this laer with eery neuron in "pDestLayer"
+	std::vector<Type> fMoms(f2dEdgeMat.GetH(), 0);	// TODO not used by SOMs
+	std::vector<Type> fVals(f2dEdgeMat.GetH(), 0);
 
 	for(int i = 0; i < static_cast<int>(this->m_lNeurons.size() ); i++) {
 		ANN::printf("Connect input neuron %d to output layer.. %d/%d\n", i, i+1, this->m_lNeurons.size());
 		pSrcNeuron = this->m_lNeurons[i];
 
 		fVals = f2dEdgeMat.GetSubArrayX(i);
-		if(pSrcNeuron != NULL) {
+		if(pSrcNeuron != nullptr) {
 			Connect(pSrcNeuron, pDestLayer, fVals, fMoms, bAllowAdapt);
 		}
 	}
 }
 
 template <class Type>
-std::vector<float> SOMLayer<Type>::GetPosition(const unsigned int iNeuronID) {
+std::vector<float> SOMLayer<Type>::GetPosition(const uint32_t iNeuronID) {
 	AbsNeuron<Type> *pSrcNeuron = this->m_lNeurons[iNeuronID];
-	if(pSrcNeuron == NULL) {
+	if(pSrcNeuron == nullptr) {
 		return std::vector<float>();
 	}
 	return pSrcNeuron->GetPosition();
@@ -162,16 +160,16 @@ template <class Type>
 void SOMLayer<Type>::SetLearningRate(const float &fVal) {
 	#pragma omp parallel for
 	for(int j = 0; j < static_cast<int>( this->m_lNeurons.size() ); j++) {
-		((SOMNeuron<Type>*)this->m_lNeurons[j])->SetLearningRate(fVal);
+		static_cast<SOMNeuron<Type>*>(this->m_lNeurons[j])->SetLearningRate(fVal);
 	}
 }
 
 template <class Type>
-std::vector<unsigned int> SOMLayer<Type>::GetDim() const {
+std::vector<uint32_t> SOMLayer<Type>::GetDim() const {
 	return m_vDim;
 }
 
 template <class Type>
-unsigned int SOMLayer<Type>::GetDim(const unsigned int &iInd) const {
+uint32_t SOMLayer<Type>::GetDim(const uint32_t &iInd) const {
 	return m_vDim.at(iInd);
 }
