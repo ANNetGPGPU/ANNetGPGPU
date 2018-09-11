@@ -19,7 +19,7 @@
 #ifndef SWIG
 #include <vector>
 #include <map>
-#include "containers/2DArrayGPU.h"
+#include "containers/2DArray.h"
 
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
@@ -33,7 +33,7 @@ struct SOMExport {
 // VARIABLES
 	ANNGPGPU::F2DArray<Type> _f2dEdges;
 	ANNGPGPU::F2DArray<Type> _f2dPositions;
-        thrust::device_vector<Type> _dvSigma0;
+	thrust::device_vector<Type> _dvSigma0;
 	thrust::device_vector<Type> _dvLearningRate;
 	
 #ifdef __SOMExport_ADDON

@@ -290,14 +290,14 @@ void SOMNet<Type, Functor>::PropagateBW() {
 }
 
 template<class Type, class Functor>
-std::vector<Centroid<Type>> SOMNet<Type, Functor>::FindAllCentroids() {
+std::vector<ANN::Centroid<Type>> SOMNet<Type, Functor>::FindCentroids() {
 	std::vector<Centroid<Type>> vCentroids;
 	for(uint32_t i = 0; i < this->GetTrainingSet()->GetNrElements(); i++) {
 		// Present the input vector to each node and determine the BMU
 		this->SetInput(this->GetTrainingSet()->GetInput(i) );
 		FindBMNeuron();
 
-		Centroid<Type> centr;
+		ANN::Centroid<Type> centr;
 		centr._unitID = m_pBMNeuron->GetID();
 		for(uint32_t j = 0; j < m_pBMNeuron->GetConsI().size(); j++) {
 			centr._edges.push_back(m_pBMNeuron->GetConI(j)->GetValue());

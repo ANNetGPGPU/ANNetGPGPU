@@ -20,10 +20,11 @@
 #include <type_traits>
 #include <iostream>
 #include <vector>
+#include <thrust/host_vector.h>
 #endif
 
 
-namespace ANN {
+namespace ANNGPGPU {
 	template <class Type>
 	class Centroid
 	{
@@ -31,8 +32,8 @@ namespace ANN {
 		Type _distance = static_cast<Type>(0);
 		int32_t _unitID = -1;
 		int32_t _deviceID = -1;
-		std::vector<Type> _position;
-		std::vector<Type> _edges;
+		thrust::host_vector<Type> _position;
+		thrust::host_vector<Type> _edges;
 		std::vector<Type> _input;
 		
 		Centroid(Type fDist = 0, int32_t iUnit = -1, int32_t iDev = -1) {
@@ -67,7 +68,7 @@ namespace ANN {
 };
 
 template <class T>
-std::ostream& operator << (std::ostream &os, ANN::Centroid<T> &op) {
+std::ostream& operator << (std::ostream &os, ANNGPGPU::Centroid<T> &op) {
 	for(unsigned int i = 0; i < op._edges.size(); i++) {
 		std::cout<<"Centroid["<<i<<"]: "<<op._edges[i]<<std::endl;
 	}

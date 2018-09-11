@@ -12,6 +12,7 @@
 #include <ANGPGPU>
 #include <ANContainers>
 #include <ANMath>
+#include <CentroidGPU.h>
 
 #include "QSOMReader.h"
 #include "Samples.h"
@@ -65,19 +66,18 @@ int main(int argc, char *argv[]) {
 
 		w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
 	}
+	ANN::printf("test\n");
+	
 	w.Save("ColorsByGPU.png");
 	
-	std::vector<ANN::Centroid<float>> cents = gpu.FindAllCentroids();
+	ANN::printf("Get centroids\n");
+	
+	std::vector<ANNGPGPU::Centroid<float>> cents = gpu.FindCentroidsGPU();
+	
+	ANN::printf("size_of cents %d\n", cents.size());
+
 	for(auto centr : cents) {
-		std::cout 
-		<< std::setprecision(2)
-		<< "ID: " << centr._unitID 
-		<< ", distance: " << centr._distance
-		<< std::endl
-		<< "\tinput: " << centr._input[0] << ";" << centr._input[1] << ";" << centr._input[2]
-		<< std::endl
-		<< "\tedges: " << centr._edges[0] << ";" << centr._edges[1] << ";" << centr._edges[2]
-		<< std::endl;
+		std::cout << centr << std::endl;
 	}
 
 	return 0;

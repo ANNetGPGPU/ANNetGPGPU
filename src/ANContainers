@@ -4,7 +4,6 @@
 #include "containers/TrainingSet.h"
 #include "containers/ConTable.h"
 #include "containers/2DArray.h"
-#include "containers/3DArray.h"
 #include "containers/Centroid.h"
 
 #endif /* CONTAINERS_H_ */

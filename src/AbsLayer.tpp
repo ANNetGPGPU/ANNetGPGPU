@@ -129,8 +129,7 @@ F2DArray<Type> AbsLayer<Type>::ExpEdgesIn() const {
 
 	assert(iWidth > 0 && iHeight > 0);
 
-	F2DArray<Type> vRes;
-	vRes.Alloc(iWidth, iHeight);
+	F2DArray<Type> vRes(iWidth, iHeight);
 
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
@@ -150,8 +149,7 @@ F2DArray<Type> AbsLayer<Type>::ExpEdgesIn(int iStart, int iStop) const {
 	assert(iStart >= 0);
 	assert(iStop < m_lNeurons.size() );
 
-	F2DArray<Type> vRes;
-	vRes.Alloc(iWidth, iHeight);
+	F2DArray<Type> vRes(iWidth, iHeight);
 	
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
@@ -171,8 +169,7 @@ F2DArray<Type> AbsLayer<Type>::ExpEdgesOut() const {
 
 	assert(iWidth > 0 && iHeight > 0);
 
-	F2DArray<Type> vRes;
-	vRes.Alloc(iWidth, iHeight);
+	F2DArray<Type> vRes(iWidth, iHeight);
 
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
@@ -192,8 +189,7 @@ F2DArray<Type> AbsLayer<Type>::ExpEdgesOut(int iStart, int iStop) const {
 	assert(iStart >= 0);
 	assert(iStop < m_lNeurons.size() );
 
-	F2DArray<Type> vRes;
-	vRes.Alloc(iWidth, iHeight);
+	F2DArray<Type> vRes(iWidth, iHeight);
 	
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
@@ -279,8 +275,7 @@ F2DArray<Type> AbsLayer<Type>::ExpPositions() const {
 	
 	assert(iWidth > 0 && iHeight > 0);
 
-	F2DArray<Type> vRes;
-	vRes.Alloc(iWidth, iHeight);
+	F2DArray<Type> vRes(iWidth, iHeight);
 
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
@@ -300,8 +295,7 @@ F2DArray<Type> AbsLayer<Type>::ExpPositions(int iStart, int iStop) const {
 	assert(iStart >= 0);
 	assert(iStop < m_lNeurons.size() );
 
-	F2DArray<Type> vRes;
-	vRes.Alloc(iWidth, iHeight);
+	F2DArray<Type> vRes(iWidth, iHeight);
 
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {

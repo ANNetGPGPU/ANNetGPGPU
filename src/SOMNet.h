@@ -35,9 +35,9 @@
 #include "math/Functions.h"
 #include "math/Random.h"
 
+#include "containers/Centroid.h"
 #include "containers/TrainingSet.h"
 #include "containers/ConTable.h"
-#include "containers/Centroid.h"
 
 #include <vector>
 #include <map>
@@ -210,7 +210,7 @@ public:
 	 * @brief Clustering results of the network.
 	 * @return std::vector<Centroid> Iterates through the input list and calcs the euclidean distance based on the BMU.
 	 */
-	virtual std::vector<Centroid<Type>> FindAllCentroids();
+	virtual std::vector<Centroid<Type>> FindCentroids();
 	
 #ifdef __SOMNet_ADDON
 	#include __SOMNet_ADDON

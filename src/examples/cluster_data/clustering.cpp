@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	cpu.SetTrainingSet(input);
 
 	cpu.Training(1000);
-	std::vector<ANN::Centroid<float>> vCen = cpu.FindAllCentroids();
+	std::vector<ANN::Centroid<float>> vCen = cpu.FindCentroids();
 	for(size_t i = 0; i < vCen.size(); i++) {
 		std::cout << vCen.at(i)._unitID << ", "  << vCen.at(i)._distance << std::endl;
 	}

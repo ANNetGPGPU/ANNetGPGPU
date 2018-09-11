@@ -11,7 +11,6 @@ Author: Daniel Frenzel"
 
 %include containers/Centroid.i
 %include containers/2DArray.i
-%include containers/3DArray.i
 %include containers/TrainingSet.i
 %include containers/ConTable.i
 

@@ -20,8 +20,6 @@
 #include "SOMExport.h"
 #include "SOMNet.h"
 
-#include "containers/Centroid.h"
-
 #include <cfloat>
 #include <map>
 #include <cmath>
@@ -33,6 +31,8 @@
 
 namespace ANNGPGPU {
 
+template <class T> class Centroid;
+	
 template <class Type, class Functor>
 class SOMNetGPU : public ANN::SOMNet<Type, Functor> {
 private:
@@ -45,7 +45,7 @@ private:
 	 * @return Number of cuda capable devices
 	 */
 	int32_t GetCudaDeviceCount() const;
-	ANN::Centroid<Type> hostSOMFindBMNeuronID(std::vector<SOMExport<Type>> &SExp, const thrust::device_vector<Type> &dvInput);
+	Centroid<Type> hostSOMFindBMNeuronID(std::vector<SOMExport<Type>> &SExp, const thrust::device_vector<Type> &dvInput);
 	void hostSOMPropagateBW( std::vector<SOMExport<Type>> &SExp, const int32_t &iPatternID);
 
 public:
@@ -65,7 +65,7 @@ public:
 	 * @brief Clustering results of the network.
 	 * @return std::vector<Centroid> Iterates through the input list and calcs the euclidean distance based on the BMU.
 	 */
-	std::vector<ANN::Centroid<Type>> FindAllCentroids() override;
+	virtual std::vector<Centroid<Type>> FindCentroidsGPU();
 	
 #ifdef __SOMNetGPU_ADDON
 	#include __SOMNetGPU_ADDON
