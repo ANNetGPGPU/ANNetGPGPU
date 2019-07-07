@@ -181,8 +181,8 @@ public:
 }
 
 template <class T>
-std::ostream& operator << (std::ostream &os, ANN::AbsNeuron<T> *op)
+std::ostream& operator << (std::ostream &os, ANN::AbsNeuron<T> &op)
 {
-	os << "Value: \t" << op->GetValue() << std::endl;
+	os << "Value: \t" << op.GetValue() << std::endl;
 	return os;     // Ref. auf Stream
 }

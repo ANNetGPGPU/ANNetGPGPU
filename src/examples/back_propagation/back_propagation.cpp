@@ -56,13 +56,13 @@ int main(int argc, char *argv[]) {
 	bool b = false;
 	float f;
 	errors = cpu_one.TrainFromData(500, 0, b, f);
-	std::cout<< &cpu_one <<std::endl;
+	std::cout<< cpu_one <<std::endl;
 
 	cpu_one.ExpToFS("foo.bar");
 	ANN::BPNet<float, ANN::fcn_log<float>> cpu_two;
 	cpu_two.ImpFromFS("foo.bar");
 	cpu_two.SetTrainingSet(input);
 	
-	std::cout<< &cpu_two <<std::endl;
+	std::cout<< cpu_two <<std::endl;
 	return 0;
 }

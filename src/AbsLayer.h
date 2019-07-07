@@ -254,8 +254,8 @@ public:
 }
 
 template <class T>
-std::ostream& operator << (std::ostream &os, ANN::AbsLayer<T> *op)
+std::ostream& operator << (std::ostream &os, ANN::AbsLayer<T> &op)
 {
-	os << "Nr. neurons: \t" << op->GetNeurons().size() << std::endl;
+	os << "Nr. neurons: \t" << op.GetNeurons().size() << std::endl;
 	return os;     // Ref. auf Stream
 }

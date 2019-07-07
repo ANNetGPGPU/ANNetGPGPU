@@ -247,23 +247,23 @@ public:
 }
 
 template <class T>
-std::ostream& operator << (std::ostream &os, ANN::AbsNet<T> *op) {
-	assert( op->GetOPLayer() != NULL );
-	if( op->GetTrainingSet() != NULL ) {
-		for( unsigned int i = 0; i < op->GetTrainingSet()->GetNrElements(); i++ ) {
-			op->SetInput( op->GetTrainingSet()->GetInput(i) );
-			op->PropagateFW();
+std::ostream& operator << (std::ostream &os, ANN::AbsNet<T> &op) {
+	assert( op.GetOPLayer() != NULL );
+	if( op.GetTrainingSet() != NULL ) {
+		for( unsigned int i = 0; i < op.GetTrainingSet()->GetNrElements(); i++ ) {
+			op.SetInput( op.GetTrainingSet()->GetInput(i) );
+			op.PropagateFW();
 
-			for(unsigned int j = 0; j < op->GetOPLayer()->GetNeurons().size(); j++) {
-				ANN::AbsNeuron<T> *pCurNeuron = op->GetOPLayer()->GetNeuron(j);
-				std::cout << pCurNeuron;
+			for(unsigned int j = 0; j < op.GetOPLayer()->GetNeurons().size(); j++) {
+				ANN::AbsNeuron<T> *pCurNeuron = op.GetOPLayer()->GetNeuron(j);
+				std::cout << *pCurNeuron << std::endl;
 			}
 			std::cout << std::endl;
 		}
 	} else {
-		for(unsigned int i = 0; i < op->GetOPLayer()->GetNeurons().size(); i++) {
-			ANN::AbsNeuron<T> *pCurNeuron = op->GetOPLayer()->GetNeuron(i);
-			std::cout << pCurNeuron;
+		for(unsigned int i = 0; i < op.GetOPLayer()->GetNeurons().size(); i++) {
+			ANN::AbsNeuron<T> *pCurNeuron = op.GetOPLayer()->GetNeuron(i);
+			std::cout << *pCurNeuron << std::endl;
 		}
 	}
 	return os;

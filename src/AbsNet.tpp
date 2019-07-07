@@ -144,8 +144,8 @@ std::vector<Type> AbsNet<Type>::TrainFromData(const unsigned int &iCycles, const
 	if(m_pTrainingData == nullptr)
 		return pErrors;
 
-	Type fCurError 	= 0.f;
-	int iProgCount 		= 1;
+	Type fCurError = 0.f;
+	int iProgCount = 1;
 
 	for(unsigned int j = 0; j < iCycles; j++) {
 		/*
@@ -163,22 +163,22 @@ std::vector<Type> AbsNet<Type>::TrainFromData(const unsigned int &iCycles, const
 		}
 
 		/*
-		 * Break if error is beyond bias
-		 */
-		if(fCurError < fTolerance && j > 0 || bBreak == true) {
-			return pErrors;
-		}
-
-		/*
 		 * Save current error in a std::vector
 		 */
-		fCurError 	= 0.f;
+		fCurError = 0.f;
 		for( unsigned int i = 0; i < m_pTrainingData->GetNrElements(); i++ ) {
 			SetInput(m_pTrainingData->GetInput(i) );
 			fCurError += SetOutput(m_pTrainingData->GetOutput(i) );
 			PropagateBW();
 		}
-		pErrors.push_back(fCurError);
+        pErrors.push_back(fCurError);
+                
+		/*
+		 * Break if error is beyond bias
+		 */
+		if(fCurError < fTolerance || bBreak == true) {
+			break;
+		}
 	}
 	return pErrors;
 }
