@@ -22,7 +22,7 @@ SET( ANCUDASourceFiles
 )
 
 IF(OPENMP_FOUND)
-  MESSAGE(STATUS "\t-OpenMP found. We will link the library against -lgomp")
+  MESSAGE(STATUS "\t- OpenMP found. We will link the library against -lgomp")
 
   add_compile_options(${OpenMP_CXX_FLAGS})
   IF(VERBOSE)
@@ -32,9 +32,12 @@ IF(OPENMP_FOUND)
 ENDIF()
 
 IF (CUDA_FOUND)
-  MESSAGE(STATUS "\t-CUDA found. We will build the library with GPGPU support.")
+  MESSAGE(STATUS "\t- CUDA found. We will build the library with GPGPU support.")
 
-  LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_30;-std=c++11;-O2")
+  if ( CMAKE_COMPILER_IS_GNUCC )
+    MESSAGE(INFO "\tImportant: ENSURE using a supported GCC version with CUDA")
+  endif()
+  
   IF(VERBOSE)
     LIST(APPEND CUDA_NVCC_FLAGS "-DVERBOSE")
   ENDIF(VERBOSE)

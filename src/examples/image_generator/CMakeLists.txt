@@ -6,11 +6,8 @@ PROJECT (SOM_IMAGE_GENERATOR)
 FIND_PACKAGE(CUDA REQUIRED)
 FIND_PACKAGE(OpenCV REQUIRED)
 
-#SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CUDA_SEPARABLE_COMPILATION ON)
-
-ADD_DEFINITIONS("-DCUDA") # needed for conditional compilation of some files
 
 # Make sure the compiler can find include files from our ANNet library.
 INCLUDE_DIRECTORIES (${CUDA_SDK_ROOT_DIR}/C/common/inc/)
@@ -20,8 +17,6 @@ INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR})
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/math)
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/gpgpu)
-
-LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_30;-std=c++11;-g;-DVERBOSE")
 
 # Build misc examples
 CUDA_ADD_EXECUTABLE (image_generator image_generator.cpp)

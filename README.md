@@ -102,6 +102,13 @@ Run CMake and make to build. Dependent on the installed libraries, either all or
 cmake .. && make
 ```
 
+or 
+
+```
+cmake -DCMAKE_CXX_FLAGS="-O2" -DCUDA_NVCC_FLAGS="-O2" ..
+make -j8
+```
+
 # Usage (Python interface)
 
 There is a python interface for the library, which may have access to the GPU too. 
